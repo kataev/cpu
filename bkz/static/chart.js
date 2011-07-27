@@ -13,7 +13,7 @@ dojo.addOnLoad(function() {
             {
 //              labels: false,
                 type: "Lines",
-//                markers: true,
+                markers: true,
                 tension: "S"
             });
     var tip = new dojox.charting.action2d.Tooltip(chart, "default");
@@ -40,13 +40,25 @@ dojo.addOnLoad(function() {
         //'../store_avg/dvt22/minute/20/'
         var i;
         i = 0;
-//        console.log(values);
+        console.log(values);
+
         var url = '../store_avg/' + values.model + '/' + values.avg + '/' + values.limit + '/';
+        if (values.date){
+//            var date = values.date;
+            url+= dojo.date.stamp.toISOString(values.date)+'/'
+        }
+
         dojo.xhrGet({'url':url,handleAs:'json'}).then(function(data) {
 
             var store = new dojo.data.ItemFileReadStore({'data':data});
             console.log('store',store);
-            store.fetch({query:{id:'*'} ,onBegin: function(total){ console.log("There are ", total, " items in this store."); } });
+            var total=0
+            store.fetch({query:{id:'*'} ,onBegin: function(t){total = t} });
+            if (!total){
+                alert('Запрос пустой');
+                return 0;
+
+            }
             var labelfTime = function(o) {
                 var d = ''
 //                        console.log(o);
@@ -68,13 +80,13 @@ dojo.addOnLoad(function() {
                                     }, function(store, item) {
                                 var o = {
                                     x: ++i,//store.getValue(item, 'id'),
-                                    y: store.getValue(item, values.value)//,
-//                                    tooltip: dojo.date.locale.format(new Date(store.getValue(item, 'date')), {
-//                                                selector: "date",
-//                                                formatLength: "short",
-//                                                locale: "ru",
-//                                                datePattern: (values.avg == 'second') ? 'd MMM h:m:s' : 'd MMM h:m'
-//                                            })
+                                    y: store.getValue(item, values.value),
+                                    tooltip: dojo.date.locale.format(new Date(store.getValue(item, 'date')), {
+                                                selector: "date",
+                                                formatLength: "short",
+                                                locale: "ru",
+                                                datePattern: 'd MMM h:m'
+                                            }) + ' ' + opt[values.value] + ': <b>' + Math.round(store.getValue(item, values.value),2)+'</b>'
                                 };
 //                                console.log(o)
                                 return o;
@@ -85,7 +97,7 @@ dojo.addOnLoad(function() {
                 selectableLegend.refresh()
             }
             else {
-                selectableLegend = new dojox.charting.widget.SelectableLegend({'chart': chart, horizontal: false, }, "selectableLegend");
+                selectableLegend = new dojox.charting.widget.SelectableLegend({'chart': chart, horizontal: false}, "selectableLegend");
             }
 
         });

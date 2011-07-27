@@ -29,18 +29,24 @@ def show(request,model):
     except :
         return HttpResponse(json({'status':False}), mimetype='application/json; charset=utf-8;')
 
-def store_avg(request,model,time,limit):
+def store_avg(request,model,time,limit,date=None):
+    d = ""
+    if date:
+        d = " where date <= '%s' " % date
+
+
     if model in ['dvt21','dvt22']:
         try:
             store = getattr(models,model+'Store')()
-            store._meta.objects = getattr(models,model).objects.raw("SELECT min(id) as id,min(date) as date,avg(hmdt) as hmdt,avg(temp) as temp from bkz_%s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % (model,time,limit))
+            print "SELECT min(id) as id,min(date) as date,avg(hmdt) as hmdt,avg(temp) as temp from bkz_%s %s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % (model,d,time,limit)
+            store._meta.objects = getattr(models,model).objects.raw("SELECT min(id) as id,min(date) as date,avg(hmdt) as hmdt,avg(temp) as temp from bkz_%s %s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % (model,d,time,limit))
             return HttpResponse(store.to_json(), mimetype='application/json; charset=utf-8;')
         except :
             return HttpResponse(json({'status':False}), mimetype='application/json; charset=utf-8;')
     else:
         try:
             store = getattr(models,model+'Store')()
-            store._meta.objects = getattr(models,model).objects.raw("SELECT min(id) as id,min(date) as date,avg(t1) as t1,avg(t2) as t2,avg(t3) as t3,avg(t4) as t4,avg(t5) as t5,avg(t6) as t6,avg(t7) as t7,avg(t8) as t8,avg(t9) as t9,avg(t10) as t10,avg(t11) as t11,avg(t12) as t12,avg(t13) as t13,avg(t14) as t14,avg(t15) as t15,avg(t16) as t16,avg(t17) as t17,avg(t18) as t18,avg(t19) as t19,avg(t20) as t02,avg(t21) as t21,avg(t22) as t22,avg(t23) as t23,avg(t24) as t24 from bkz_%s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % (model,time,limit))
+            store._meta.objects = getattr(models,model).objects.raw("SELECT min(id) as id,min(date) as date,avg(t1) as t1,avg(t2) as t2,avg(t3) as t3,avg(t4) as t4,avg(t5) as t5,avg(t6) as t6,avg(t7) as t7,avg(t8) as t8,avg(t9) as t9,avg(t10) as t10,avg(t11) as t11,avg(t12) as t12,avg(t13) as t13,avg(t14) as t14,avg(t15) as t15,avg(t16) as t16,avg(t17) as t17,avg(t18) as t18,avg(t19) as t19,avg(t20) as t02,avg(t21) as t21,avg(t22) as t22,avg(t23) as t23,avg(t24) as t24 from bkz_%s group by date_trunc('%s',date) %s ORDER BY id DESC limit %s;" % (model,time,d,limit))
             return HttpResponse(store.to_json(), mimetype='application/json; charset=utf-8;')
         except :
             return HttpResponse(json({'status':False}), mimetype='application/json; charset=utf-8;')
@@ -78,7 +84,7 @@ def show_chart(request):
     dojo_collector.add_module("dijit.form.Form")
     dojo_collector.add_module("dojo.date.locale")
     dojo_collector.add_module("dojo.data.ItemFileReadStore")
-    return render_to_response('chart2.html',{'form':form},
+    return render_to_response('chart.html',{'form':form},
                           context_instance=RequestContext(request))
 
 def show_dvt_to_chart(request):
