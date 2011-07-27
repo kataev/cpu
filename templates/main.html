@@ -1,0 +1,105 @@
+<html dir="ltr">
+<head>
+    <!DOCTYPE html>
+    <meta charset="UTF-8">
+    <title>CPU</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.js">
+    </script>
+    <script src="../dojo/dojo.js" djConfig="parseOnLoad: true,locale: 'ru'">
+    </script>
+    <script type="text/javascript">
+        function foo() {
+            var get = new dojo.xhrGet({
+                        handleAs: "json",
+                        url: "./last/"
+                    }).then(function(result) {
+                dojo.forEach(result, function(item) {
+                    dojo.byId('date').innerHTML=item.fields.date
+//                        console.log();
+                    var e = dojo.byId(item.model.split('.')[1]);
+                    for (var d in item.fields) {
+                        dojo.query('.' + d, e).forEach(function(i) {
+                            if (i != undefined) {
+                                i.innerHTML = item.fields[d];
+                            }
+                        });
+                    }
+                });
+
+            }, function(e) {
+                return;
+            });
+        }
+
+        dojo.addOnLoad(function() {
+            timer = setInterval(foo, 5000)
+//                        s = null;
+                    foo()
+
+        });
+    </script>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: black 1px solid;
+        }
+
+        table td, th {
+            border: black 1px solid;
+            width: 60px;
+            text-align: center;
+        }
+
+        .hmdt {
+            color: blue;
+        }
+
+        .temp {
+            color: red;
+        }
+
+    </style>
+</head>
+<body>
+<a href='chart/'>График</a>
+Релсиб
+<span id='date'></span>
+<table id='dvt'>
+    <tr>
+        <th>Позиция</th>
+        <th class='hmdt'>Влаж</th>
+        <th class='temp'>Темп</th>
+    </tr>
+    {% for a in dvt %}
+        <tr id='{{ a }}'>
+            <td>{{ a.position }}</td>
+            <td class='hmdt'></td>
+            <td class='temp'></td>
+        </tr>
+    {% endfor %}
+</table>
+
+Термодат
+<table id='termodat'>
+
+    {% for a in termodat %}
+        <tr>
+            <th>Позиция</th>
+            {% for f in a.fields %}
+                {% if not f.verbose_name == '' %}
+                    <th>{{ f.verbose_name }}</th>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        <tr id='{{ a.model }}'>
+            <th>Данные</th>
+            {% for f in a.fields %}
+                {% if not f.verbose_name == '' %}
+                    <td class='{{ f.name }}'></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+</body>
+</html>
