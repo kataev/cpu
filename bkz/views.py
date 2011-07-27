@@ -5,7 +5,10 @@ from cjson import encode as json
 from django.http import HttpResponse,HttpResponseRedirect,Http404
 from django.template.loader import render_to_string
 from django.core import serializers
-from django.db.models.loading import get_models, get_app
+#from django.db.models.loading import get_models, get_app
+from dojango.util import dojo_collector
+from django.shortcuts import render_to_response
+from django.template import RequestContext, loader
 
 def store(request,model):
     try:
@@ -63,18 +66,20 @@ def main(request):
     return HttpResponse(re,mimetype="text/html; charset=utf-8;")
 
 def show_chart(request):
-    j = [{'value':'temp','label':'Температура'},{'value':'hmdt','label':'Влажность'}]
+    form = chartform()
 
-    for a in termodat22m._meta.fields:
-        if a.name in ['id','date']:
-            continue
-        if len(a.verbose_name)==0:
-            continue
-        j.append({'value':a.name,'label':a.verbose_name})
-
-    print j
-    re=render_to_string('chart.html',{'models':get_models(get_app('bkz')),'options':j})
-    return HttpResponse(re,mimetype="text/html; charset=utf-8;")
+    dojo_collector.add_module("dojox.charting.widget.Chart2D")
+    dojo_collector.add_module("dojox.charting.widget.Legend")
+    dojo_collector.add_module("dojox.charting.themes.PlotKit.green")
+    dojo_collector.add_module("dojox.charting.themes.Claro")
+    dojo_collector.add_module("dojox.charting.DataSeries")
+    dojo_collector.add_module("dojox.charting.widget.SelectableLegend")
+    dojo_collector.add_module("dojox.charting.action2d.Tooltip")
+    dojo_collector.add_module("dijit.form.Form")
+    dojo_collector.add_module("dojo.date.locale")
+    dojo_collector.add_module("dojo.data.ItemFileReadStore")
+    return render_to_response('chart2.html',{'form':form},
+                          context_instance=RequestContext(request))
 
 def show_dvt_to_chart(request):
 

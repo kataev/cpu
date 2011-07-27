@@ -1,0 +1,95 @@
+/**
+ * Created by .
+ * User: kd
+ * Date: 27.07.11
+ * Time: 10:36
+ * To change this template use File | Settings | File Templates.
+ */
+//dojo.require("dojox.charting.widget.Chart");
+//dojo.require("dojox.charting.Chart");
+dojo.addOnLoad(function() {
+    chart = new dojox.charting.Chart2D('chart', null);
+    chart.addPlot("default",
+            {
+//              labels: false,
+                type: "Lines",
+//                markers: true,
+                tension: "S"
+            });
+    var tip = new dojox.charting.action2d.Tooltip(chart, "default");
+    var magnify = new dojox.charting.action2d.Magnify(chart, "default");
+
+    chart.setTheme(dojox.charting.themes.Claro);
+
+    chart.addAxis("y", {vertical: true });
+    selectableLegend = false;
+
+    var qw = {dvt21:5,dvt22:9,termodat22m:'Термодат'};
+    var opt = {temp:'Темп',hmdt:'Влаж'};
+    var l = {minute:'минут',hour:'часов',day:'дней',second:'секунд'};
+
+    form = new dijit.form.Form(null, 'form');
+    dojo.connect(form, 'onSubmit', function(e) {
+//            dojo.stopEvent(e);
+        e.preventDefault();
+        if (form.isValid()) {
+            var values = form.get("value");
+        } else {
+            return;
+        }
+        //'../store_avg/dvt22/minute/20/'
+        var i;
+        i = 0;
+//        console.log(values);
+        var url = '../store_avg/' + values.model + '/' + values.avg + '/' + values.limit + '/';
+        dojo.xhrGet({'url':url,handleAs:'json'}).then(function(data) {
+
+            var store = new dojo.data.ItemFileReadStore({'data':data});
+            console.log('store',store);
+            store.fetch({query:{id:'*'} ,onBegin: function(total){ console.log("There are ", total, " items in this store."); } });
+            var labelfTime = function(o) {
+                var d = ''
+//                        console.log(o);
+                var dt = new Date(o);
+//                        console.log(dt)
+                d = dojo.date.locale.format(dt, {
+                            selector: "date",
+                            formatLength: "short",
+                            locale: "ru",
+                            datePattern: 'h:m:s'
+                        });
+            };
+
+            chart.addAxis("x");
+//            console.log(store.query({id:'*'}))
+            var s = chart.addSeries(qw[values.model] + ' ' + opt[values.value] + ' за ' + values.limit + ' ' + l[values.avg],
+                    new dojox.charting.DataSeries(
+                            store, {query: {id: "*"}
+                                    }, function(store, item) {
+                                var o = {
+                                    x: ++i,//store.getValue(item, 'id'),
+                                    y: store.getValue(item, values.value)//,
+//                                    tooltip: dojo.date.locale.format(new Date(store.getValue(item, 'date')), {
+//                                                selector: "date",
+//                                                formatLength: "short",
+//                                                locale: "ru",
+//                                                datePattern: (values.avg == 'second') ? 'd MMM h:m:s' : 'd MMM h:m'
+//                                            })
+                                };
+//                                console.log(o)
+                                return o;
+                            }));
+            console.log(chart, s)
+            chart.render();
+            if (selectableLegend) {
+                selectableLegend.refresh()
+            }
+            else {
+                selectableLegend = new dojox.charting.widget.SelectableLegend({'chart': chart, horizontal: false, }, "selectableLegend");
+            }
+
+        });
+    })
+
+})
+        ;

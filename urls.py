@@ -12,8 +12,8 @@ urlpatterns = patterns('',
     (r'^show/$','cpu.bkz.views.show'),
     (r'^store/(?P<model>\w+)/$','cpu.bkz.views.store'),
     (r'^store_avg/(?P<model>\w+)/(?P<time>\w+)/(?P<limit>\w+)/$','cpu.bkz.views.store_avg'),
-    (r'^last/$','cpu.bkz.views.last'),
-    (r'^show/(?P<model>\w+)/$','cpu.bkz.views.show'),
+#    (r'^last/$','cpu.bkz.views.last'),
+#    (r'^show/(?P<model>\w+)/$','cpu.bkz.views.show'),
     (r'^$','cpu.bkz.views.main'),
     (r'^chart/$','cpu.bkz.views.show_chart'),
     (r'^chart/json/$','cpu.bkz.views.show_dvt_to_chart'),
@@ -28,4 +28,5 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
+    (r'^dojango/', include('dojango.urls')),
 )

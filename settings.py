@@ -12,13 +12,25 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'django',                      # Or path to database file if using sqlite3.
+        'NAME': 'cpu',                      # Or path to database file if using sqlite3.
         'USER': 'django',                      # Not used with sqlite3.
         'PASSWORD': 'django',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+
+DOJANGO_DOJO_PROFILE = "google_uncompressed"
+
+DOJANGO_DOJO_VERSION = '1.6.0'
+
+DOJANGO_DOJO_DEBUG = False
+
+DOJANGO_CDN_USE_SSL = True
+
+DOJANGO_DOJO_SECURE_JSON = False
+
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -95,9 +107,10 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+#    'django.middleware.common.CommonMiddleware',
+    'dojango.middleware.DojoCollector',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 )
@@ -118,6 +131,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'dojango',
     'cpu.bkz',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
