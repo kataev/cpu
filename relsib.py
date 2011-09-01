@@ -1,13 +1,12 @@
-    # -*- coding: utf-8 -*-
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 import serial
 import psycopg2
 from struct import pack,unpack
 from time import sleep
 from string import rjust
 
-
-
-con = psycopg2.connect(user='django',host='cpu',database='django',password='django')
+con = psycopg2.connect(user='django',host='server',database='cpu',password='django')
 cur = con.cursor()
 
 def sm(c):
@@ -139,18 +138,6 @@ registers=[22,34] # Список регистров, 22 - влага, 34 - те�
 ser=serial.Serial('/dev/ttyAP1') # Ну ты понел
 while True: # Бесконечный циклянский
 
-#    print con.status,con.closed
-
-#    if con.closed==2:
-#        print con.status
-#        try:
-#            con = psycopg2.connect(user='django',host='cpu',database='django',password='django')
-#            cur = con.cursor()
-#            print 'ENABLED'
-#        except :
-#            next
-
-
     for id in devices: # Цикл по девайсам
         dvt={} # Буфер для данных
         for r in registers: # Цикл по регистрам
@@ -173,14 +160,8 @@ while True: # Бесконечный циклянский
                 dvt[r]=0 # Запишем 0 
 		print 'zero'
                 ser.flushInput() # Очищяем
-        try:
-            cur.execute('INSERT INTO bkz_dvt%s (temp,hmdt,date) VALUES (%s, %s,NOW());',(id,dvt[34],dvt[22]))
-        except:
-            print 'ex'
-    try:
-        con.commit()
-    except:
-        print 'ex'
+        cur.execute('INSERT INTO bkz_dvt%s (temp,hmdt,date) VALUES (%s, %s,NOW());',(id,dvt[34],dvt[22]))
+    con.commit()
 
     ser.flushInput()
     #1 - addres, 0 - start, 24-end
@@ -191,16 +172,7 @@ while True: # Бесконечный циклянский
     else:
         data = ser.read(ser.inWaiting())
         a = sp(data[7:-4],4)
-        try:
-            cur.execute('INSERT INTO bkz_termodat22m (date,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24) VALUES (NOW(),%s);' % str(a)[1:-1])
-            con.commit()
-        except:
-            print 'ex'
+        cur.execute('INSERT INTO bkz_termodat22m (date,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24) VALUES (NOW(),%s);' % str(a)[1:-1])
+        con.commit()
 
-
-#        m = getattr(models,'dvt'+str(id))(hmdt=dvt[22],temp=dvt[34]) # Засовываем на места данных
-#	print id
-#	print dvt
-#        m.save() # Схоронил
-#	sleep(0)
 ser.close() # Зашил порт, по идее ни когда не выполнится.
