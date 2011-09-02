@@ -15,7 +15,7 @@
                     }).then(function(result) {
                 dojo.forEach(result, function(item) {
                     dojo.byId('date').innerHTML=item.fields.date
-//                        console.log();
+
                     var e = dojo.byId(item.model.split('.')[1]);
                     for (var d in item.fields) {
                         dojo.query('.' + d, e).forEach(function(i) {
@@ -78,10 +78,8 @@
         </tr>
     {% endfor %}
 </table>
-
 Термодат
 <table id='termodat'>
-
     {% for a in termodat %}
         <tr>
             <th>Позиция</th>

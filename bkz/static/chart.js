@@ -87,7 +87,7 @@ dojo.addOnLoad(function() {
                                     tooltip: dojo.date.locale.format(new Date(store.getValue(item, 'date')), {
                                                 selector: "date",
                                                 formatLength: "short",
-                                                locale: "ru",t a
+                                                locale: "ru",
                                                 datePattern: 'd MMM h:m'
                                             }) + ' ' + dijit.byId('id_value').attr('displayedValue') + ': <b>' + Math.round(store.getValue(item, values.value),2)+'</b>'
                                 };
