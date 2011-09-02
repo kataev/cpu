@@ -15,15 +15,18 @@ DATABASES = {
         'NAME': 'cpu',                      # Or path to database file if using sqlite3.
         'USER': 'django',                      # Not used with sqlite3.
         'PASSWORD': 'django',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'HOST': 'server',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
 
-DOJANGO_DOJO_PROFILE = "google_uncompressed"
+DOJANGO_DOJO_PROFILE = "google"
+DOJANGO_DOJO_BUILD_VERSION='1.6.1'
 
-DOJANGO_DOJO_VERSION = '1.6.0'
+#DOJANGO_DOJO_VERSION = '1.6.1'
+#DOJANGO_DOJO_PROFILE = 'local'
+#DOJANGO_DOJO_VERSION = "dojango-with-dojo1.6.1"
 
 DOJANGO_DOJO_DEBUG = False
 
@@ -66,11 +69,13 @@ MEDIA_ROOT = ''
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = ''
 
+DOJANGO_BASE_MEDIA_URL = '/cpu/dojango/dojo-media'
+
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '/var/www/static/'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -125,6 +130,8 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+#    "djcelery",
+#    "djkombu",
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -161,3 +168,11 @@ LOGGING = {
         },
     }
 }
+
+
+#import djcelery
+#djcelery.setup_loader()
+#
+#CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+#BROKER_BACKEND = "djkombu.transport.DatabaseTransport"
+#

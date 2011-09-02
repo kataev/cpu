@@ -1,1 +1,10 @@
-Cpu relsib termodat data collector by python
+Python Modbus data collector in datebase.
+Work with Relsib and Termodat devices over modbus ASCII and Termodat protocol.
+
+
+Сбор и сохранение данных с приборов работающих через Modbus.
+Работает с приборами марки Релсиб и Термодат по стандарту Модбас и Термодат.
+
+
+
+

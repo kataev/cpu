@@ -10,72 +10,72 @@ con = psycopg2.connect(user='django',host='server',database='cpu',password='djan
 cur = con.cursor()
 
 def sm(c):
-    return ":"+c+hex(255-reduce(operator.xor, map(ord, c))-1)[-2:]+"\r\n"
+	return ":"+c+hex(255-reduce(operator.xor, map(ord, c))-1)[-2:]+"\r\n"
 
 def bin(s):
-    s=int(s)
-    return str(s) if s<=1 else bin(s>>1) + str(s&1)
+	s=int(s)
+	return str(s) if s<=1 else bin(s>>1) + str(s&1)
 
 def tb(int_type, offset):
-    mask = 1 << offset
-    return(int_type ^ mask)
+	mask = 1 << offset
+	return(int_type ^ mask)
 
 def inv(q):
-    w = ""
-    i=0
-    for i in range(len(q)):
-        w+=str(tb(int(q[i]),0))
-        i+=1
-    return w
+	w = ""
+	i=0
+	for i in range(len(q)):
+		w+=str(tb(int(q[i]),0))
+		i+=1
+	return w
 
 def out(s):
-    if s=="0000":
-        return 0
-    if s=="7D00":
-        return 0
-    try:
-        if int(s,16)>2000:
-            a = int(inv(bin(int(s,16)-1)),2)/10.
-        else:
-            a = int(s,16)/10.
-    except :
-        a = 0
-    return a
+	if s=="0000":
+		return 0
+	if s=="7D00":
+		return 0
+	try:
+		if int(s,16)>2000:
+			a = int(inv(bin(int(s,16)-1)),2)/10.
+		else:
+			a = int(s,16)/10.
+	except :
+		a = 0
+	return a
 
 def sp(s,g):
-    r=0
-    q=[]
+	r=0
+	q=[]
 #    i=0
-    while r!=len(s):
+	while r!=len(s):
 #        q['t'+str(i)]=out(s[r:r+g])
-        q.append(out(s[r:r+g]))
-        r+=g
+		q.append(out(s[r:r+g]))
+		r+=g
 #        i+=1
-    return q
+	return q
 
 def mes(a,b,n):
-    return rjust(hex(a).split("x")[1],2,"0")+"03"+rjust(hex(b).split("x")[1],4,"0")+rjust(hex(n).split("x")[1],4,"0")
+	return rjust(hex(a).split("x")[1],2,"0")+"03"+rjust(hex(b).split("x")[1],4,"0")+rjust(hex(n).split("x")[1],4,"0")
 
 def lrc(s):
-    i = 0
-    hs=""
-    ls=""
-    while i<len(s):
-        if i%2==0:
-            hs+=s[i]
-        else:
-            ls+=s[i]
-        i+=1
-    i=0
-    h=0
-    l=0
-    while i<len(hs):
-        h+=int(hs[i],16)
-        l+=int(ls[i],16)
-        i+=1
-    hi=inv(rjust(bin(h),4,"0"))
-    li=inv(rjust(bin(l),4,"0"))
-    return ":"+s+hex(int(hi,2))[-1:]+hex(int(li,2)+1)[-1:]+"\r\n"
+	i = 0
+	hs=""
+	ls=""
+	while i<len(s):
+		if i%2==0:
+			hs+=s[i]
+		else:
+			ls+=s[i]
+		i+=1
+	i=0
+	h=0
+	l=0
+	while i<len(hs):
+		h+=int(hs[i],16)
+		l+=int(ls[i],16)
+		i+=1
+	hi=inv(rjust(bin(h),4,"0"))
+	li=inv(rjust(bin(l),4,"0"))
+	return ":"+s+hex(int(hi,2))[-1:]+hex(int(li,2)+1)[-1:]+"\r\n"
 
 #~ Table of CRC values for high–order byte
 auchCRCHi = [
@@ -121,15 +121,15 @@ auchCRCLo = [
 ##########################################################################
 
 def crc16 (data) :
-    uchCRCHi = 0xFF   # high byte of CRC initialized
-    uchCRCLo = 0xFF   # low byte of CRC initialized
-    uIndex   = 0x0000 # will index into CRC lookup table
+	uchCRCHi = 0xFF   # high byte of CRC initialized
+	uchCRCLo = 0xFF   # low byte of CRC initialized
+	uIndex   = 0x0000 # will index into CRC lookup table
 
-    for ch in data :
-        uIndex   = uchCRCLo ^ ord(ch)
-        uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex]
-        uchCRCHi = auchCRCLo[uIndex]
-    return (uchCRCHi << 8 | uchCRCLo)
+	for ch in data :
+		uIndex   = uchCRCLo ^ ord(ch)
+		uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex]
+		uchCRCHi = auchCRCLo[uIndex]
+	return (uchCRCHi << 8 | uchCRCLo)
 
 
 devices = [21,22] # Список девайсов
@@ -137,42 +137,33 @@ registers=[22,34] # Список регистров, 22 - влага, 34 - те�
 
 ser=serial.Serial('/dev/ttyAP1') # Ну ты понел
 while True: # Бесконечный циклянский
+	for id in devices: # Цикл по девайсам
+		dvt={} # Буфер для данных
+		for r in registers: # Цикл по регистрам
+			w=pack('6B',id,04,00,r,00,02) # Запрос генерируем
+			ser.write(w) # Пишем
+			ser.write(pack('=H',crc16(w))) # Дописываем crc16
+			sleep(.4) # Засыпаем 200мс
+			if ser.inWaiting()!=0: # Если есть хоть один бит в буфере
+				if ser.inWaiting() < 9: # Ждем 9
+					sleep(.4) # Если меньше 9 то еще поспать 400mc
+				write = ser.read(9)[3:-2][::-1]
+				dvt[r] = round(unpack('f',write)[0],3)
+			sleep(.2)
+			ser.flushInput() # Очищяем
+			ser.flushOutput()
+		cur.execute('INSERT INTO bkz_dvt%s (temp,hmdt,date) VALUES (%s, %s,NOW());',(id,dvt[34],dvt[22]))
+	con.commit()
 
-    for id in devices: # Цикл по девайсам
-        dvt={} # Буфер для данных
-        for r in registers: # Цикл по регистрам
-            w=pack('6B',id,04,00,r,00,02) # Запрос генерируем
-            ser.write(w) # Пишем
-            ser.write(pack('=H',crc16(w))) # Дописываем crc16
-            sleep(.4) # Засыпаем 200мс
-            if ser.inWaiting()!=0: # Если есть хоть один бит в буфере
-                if ser.inWaiting() < 9: # Ждем 9
-                    sleep(.4) # Если меньше 9 то еще поспать 400mc
-                # Разпаковываем 9 символов берем место с данными,
-                # ражимаем его как float, предварительно инвертировав,
-                # округляем
-		write=ser.read(9)[3:-2][::-1] 
-		dvt[r]=round(unpack('f',write)[0],3)
-#		print unpack('f',write[:4])
-                ser.flushInput() # Очищяем 
-            else: # Если устройство не отвечает
-                sleep(.3) #Обождём, хотел сделать если "если появилось", но передумал
-                dvt[r]=0 # Запишем 0 
-		print 'zero'
-                ser.flushInput() # Очищяем
-        cur.execute('INSERT INTO bkz_dvt%s (temp,hmdt,date) VALUES (%s, %s,NOW());',(id,dvt[34],dvt[22]))
-    con.commit()
-
-    ser.flushInput()
-    #1 - addres, 0 - start, 24-end
-    ser.write(lrc(mes(1,0,24)))
-    sleep(.4)
-    if ser.inWaiting()==0:
-        ser.flushInput()
-    else:
-        data = ser.read(ser.inWaiting())
-        a = sp(data[7:-4],4)
-        cur.execute('INSERT INTO bkz_termodat22m (date,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24) VALUES (NOW(),%s);' % str(a)[1:-1])
-        con.commit()
+	ser.write(lrc(mes(1,0,24)))
+	sleep(.4)
+	if ser.inWaiting()==0:
+		ser.flushInput()
+		ser.flushOutput()
+	else:
+		data = ser.read(ser.inWaiting())
+		a = sp(data[7:-4],4)
+		cur.execute('INSERT INTO bkz_termodat22m (date,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24) VALUES (NOW(),%s);' % str(a)[1:-1])
+		con.commit()
 
 ser.close() # Зашил порт, по идее ни когда не выполнится.

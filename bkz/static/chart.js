@@ -5,8 +5,9 @@
  * Time: 10:36
  * To change this template use File | Settings | File Templates.
  */
-//dojo.require("dojox.charting.widget.Chart");
-//dojo.require("dojox.charting.Chart");
+
+dojo.require("dojo.date.locale");
+dojo.require('dojo.date');
 dojo.addOnLoad(function() {
     chart = new dojox.charting.Chart2D('chart', null);
     chart.addPlot("default",
@@ -24,8 +25,6 @@ dojo.addOnLoad(function() {
     chart.addAxis("y", {vertical: true });
     selectableLegend = false;
 
-    var qw = {dvt21:5,dvt22:9,termodat22m:'Термодат'};
-    var opt = {temp:'Темп',hmdt:'Влаж'};
     var l = {minute:'минут',hour:'часов',day:'дней',second:'секунд'};
 
     form = new dijit.form.Form(null, 'form');
@@ -51,13 +50,12 @@ dojo.addOnLoad(function() {
         dojo.xhrGet({'url':url,handleAs:'json'}).then(function(data) {
 
             var store = new dojo.data.ItemFileReadStore({'data':data});
-            console.log('store',store);
+//            console.log('store',store);
             var total=0
             store.fetch({query:{id:'*'} ,onBegin: function(t){total = t} });
             if (!total){
                 alert('Запрос пустой');
                 return 0;
-
             }
             var labelfTime = function(o) {
                 var d = ''
@@ -74,7 +72,12 @@ dojo.addOnLoad(function() {
 
             chart.addAxis("x");
 //            console.log(store.query({id:'*'}))
-            var s = chart.addSeries(qw[values.model] + ' ' + opt[values.value] + ' за ' + values.limit + ' ' + l[values.avg],
+            var s = chart.addSeries(dijit.byId('id_model').attr('displayedValue') + ' <b>'
+                + dijit.byId('id_value').attr('displayedValue') + '</b> за '
+                + values.limit + ' ' + l[values.avg]+' от '+dojo.date.locale.format(values.date  || new Date(), {
+            selector: "date",
+            datePattern: 'MMM d, yyyy'
+        }),
                     new dojox.charting.DataSeries(
                             store, {query: {id: "*"}
                                     }, function(store, item) {
@@ -84,14 +87,14 @@ dojo.addOnLoad(function() {
                                     tooltip: dojo.date.locale.format(new Date(store.getValue(item, 'date')), {
                                                 selector: "date",
                                                 formatLength: "short",
-                                                locale: "ru",
+                                                locale: "ru",t a
                                                 datePattern: 'd MMM h:m'
-                                            }) + ' ' + opt[values.value] + ': <b>' + Math.round(store.getValue(item, values.value),2)+'</b>'
+                                            }) + ' ' + dijit.byId('id_value').attr('displayedValue') + ': <b>' + Math.round(store.getValue(item, values.value),2)+'</b>'
                                 };
 //                                console.log(o)
                                 return o;
                             }));
-            console.log(chart, s)
+//            console.log(chart, s)
             chart.render();
             if (selectableLegend) {
                 selectableLegend.refresh()

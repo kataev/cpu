@@ -29,6 +29,9 @@ def show(request,model):
     except :
         return HttpResponse(json({'status':False}), mimetype='application/json; charset=utf-8;')
 
+
+
+
 def store_avg(request,model,time,limit,date=None):
     d = ""
     if date:
@@ -85,6 +88,19 @@ def show_chart(request):
     dojo_collector.add_module("dojo.date.locale")
     dojo_collector.add_module("dojo.data.ItemFileReadStore")
     return render_to_response('chart.html',{'form':form},
+                          context_instance=RequestContext(request))
+def ust(request):
+    form = chartform()
+
+    dojo_collector.add_module("dojox.charting.widget.Chart2D")
+    dojo_collector.add_module("dijit.form.NumberSpinner")
+#    dojo_collector.add_module("dojox.charting.widget.Legend")
+#    dojo_collector.add_module("dojox.charting.themes.PlotKit.green")
+#    dojo_collector.add_module("dojox.charting.themes.Claro")
+#    dojo_collector.add_module("dojox.charting.DataSeries")
+#    dojo_collector.add_module("dojox.charting.widget.SelectableLegend")
+#    dojo_collector.add_module("dojox.charting.action2d.Tooltip")
+    return render_to_response('ust.html',{'form':form},
                           context_instance=RequestContext(request))
 
 def show_dvt_to_chart(request):
