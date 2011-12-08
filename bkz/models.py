@@ -57,15 +57,15 @@ class termodat22m(models.Model):
     t8 = models.FloatField(verbose_name=u"разр 502", null=True)
     t9 = models.FloatField(verbose_name=u"разр 602", null=True)
 
-    t10 = models.FloatField(verbose_name=u"", null=True)
-    t11 = models.FloatField(verbose_name=u"", null=True)
-    t12 = models.FloatField(verbose_name=u"", null=True)
+    t10 = models.FloatField(verbose_name=u"M201", null=True)
+    t11 = models.FloatField(verbose_name=u"M202", null=True)
+    t12 = models.FloatField(verbose_name=u"M203", null=True)
 
-    t13 = models.FloatField(verbose_name=u"", null=True)
-    t14 = models.FloatField(verbose_name=u"", null=True)
-    t15 = models.FloatField(verbose_name=u"", null=True)
-    t16 = models.FloatField(verbose_name=u"", null=True)
-    t17 = models.FloatField(verbose_name=u"", null=True)
+    t13 = models.FloatField(verbose_name=u"M204", null=True)
+    t14 = models.FloatField(verbose_name=u"M205", null=True)
+    t15 = models.FloatField(verbose_name=u"M206", null=True)
+    t16 = models.FloatField(verbose_name=u"M207", null=True)
+    t17 = models.FloatField(verbose_name=u"M208", null=True)
     t18 = models.FloatField(verbose_name=u"", null=True)
     t19 = models.FloatField(verbose_name=u"", null=True)
     t20 = models.FloatField(verbose_name=u"", null=True)
@@ -119,7 +119,7 @@ class dvt21Store(Store):
 #    position = StoreField(get_value=ObjectMethod('get_position'))
 
     class Meta(object):
-        objects = [dvt21.objects.latest('id')]
+#        objects = [dvt21.objects.latest('id')]
 #        objects = dvt21.objects.order_by('date').reverse().all()[:50]
         label = None
 
@@ -131,7 +131,7 @@ class dvt22Store(Store):
 #    position = StoreField(get_value=ObjectMethod('get_position'))
 
     class Meta(object):
-        objects = [dvt22.objects.latest('id')]
+#        objects = [dvt22.objects.latest('id')]
 #        objects = dvt22.objects.order_by('date').reverse().all()[:50]
         label = None
 class termodat22mStore(Store):
@@ -166,7 +166,7 @@ class termodat22mStore(Store):
 #    position = StoreField(get_value=ObjectMethod('get_position'))
 
     class Meta(object):
-        objects = [termodat22m.objects.latest('id')]
+#        objects = [termodat22m.objects.latest('id')]
 #        objects = termodat22m.objects.order_by('date').reverse().all()[:50]
         label=None
 #        label = termodat22m._meta.verbose_name

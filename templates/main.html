@@ -86,15 +86,17 @@
             {% for f in a.fields %}
                 {% if f.verbose_name %}
                     <th>{{ f.verbose_name }}</th>
-		{% else %}
-		    <th>{{ f.name }}</th>
+{#        {% else %}#}
+{#            <th>{{ f.name }}</th>#}
                 {% endif %}
             {% endfor %}
         </tr>
         <tr id='{{ a.model }}'>
             <th>Данные</th>
             {% for f in a.fields %}
+                {% if f.verbose_name %}
                     <td class='{{ f.name }}'></td>
+                {% endif %}
             {% endfor %}
         </tr>
     {% endfor %}

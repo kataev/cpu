@@ -37,10 +37,7 @@ def out(s):
     if s == "7D00":
         return 0
     try:
-        if int(s, 16) > 2000:
-            a = int(inv(bin(int(s, 16) - 1)), 2) / 10.
-        else:
-            a = int(s, 16) / 10.
+        a = int(s, 16) / 10.
     except:
         a = 0
     return a
