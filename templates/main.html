@@ -84,7 +84,6 @@
         <tr>
             <th>Позиция</th>
             {% for f in a.fields %}
-                {% if f.name == 't6' %} </tr> <tr> {% endif %}
                 {% if f.verbose_name %}
                     <th>{{ f.verbose_name }}</th>
 {#        {% else %}#}
@@ -95,7 +94,6 @@
         <tr id='{{ a.model }}'>
             <th>Данные</th>
             {% for f in a.fields %}
-                {% if f.name == 't6' %} </tr> <tr> {% endif %}
                 {% if f.verbose_name %}
                     <td class='{{ f.name }}'></td>
                 {% endif %}

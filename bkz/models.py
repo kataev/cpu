@@ -42,6 +42,11 @@ class dvt22(relsib):
     class Meta:
         verbose_name = u'dvt22'
 
+class Positions(models.Model):
+    name = models.CharField(max_length=100)
+    field = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
+
 
 class termodat22m(models.Model):
     position = 'Термодат'
@@ -80,43 +85,7 @@ class termodat22m(models.Model):
         return self._meta.verbose_name
 
 
-class chartform(forms.Form):
-    model_c = (('dvt21', dvt21.position), ('dvt22', dvt22.position),
-               ('termodat22m',u'Термодат'))
-    value_c = (
-    ('hmdt', u'Влажность'),
-    ('temp', u'Температура'),
-    ('t1',u"гор 703"),
-    ('t2',u"гор 704"),
-    ('t3',u"гор 306"),
-    ('t4',u"гор 606"),
-    ('t5',u"гор 206"),
-    ('t6',u"гор 506"),
-    ('t7',u"давление 401"),
-    ('t8',u"разр 502"),
-    ('t9',u"разр 602"),
-    ('t10',u"M201"),
-    ('t11',u"M202"),
-    ('t12',u"M203"),
-    ('t13',u"M304"),
-    ('t14',u"M205"),
-    ('t15',u"M206"),
-    ('t16',u"M207"),
-    ('t17',u"M208"),
 
-        )
-    avg_c =(
-        ('minute','Минутам'),
-        ('second','Секундам'),
-        ('hour','Часам'),
-        ('day','Дням'),
-    )
-
-    model = forms.ChoiceField(label=u'Датчик', choices=model_c,)
-    value = forms.ChoiceField(choices=value_c,label=u'Значения, и горелки для термодата')
-    avg = forms.ChoiceField(choices=avg_c,label=u'Усреднять по')
-    limit = forms.IntegerField(initial=10,widget=forms.NumberSpinnerInput(attrs={'style': 'width:80px;', 'constraints': {'min': 1}}),label=u'Кол-во точек')
-    date = forms.DateField(required=False, label=u'Начало отсчета(не обязательнo)')
 
 
 class dvt21Store(Store):
