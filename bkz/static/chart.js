@@ -5,6 +5,8 @@
  * Time: 10:36
  * To change this template use File | Settings | File Templates.
  */
+dojo.require("dijit.layout.BorderContainer");
+dojo.require("dijit.layout.ContentPane");
 
 dojo.require("dojo.date.locale");
 dojo.require('dojo.date');
