@@ -6,8 +6,7 @@ from struct import pack, unpack
 from time import sleep
 from string import rjust
 
-con = psycopg2.connect(user='django', host='server', database='cpu', password='django')
-cur = con.cursor()
+
 
 def sm(c):
     return ":" + c + hex(255 - reduce(operator.xor, map(ord, c)) - 1)[-2:] + "\r\n"
@@ -145,6 +144,8 @@ registers = [22, 34] # Список регистров, 22 - влага, 34 - т
 
 ser = serial.Serial('/dev/ttyAP1') # Ну ты понел
 while True: # Бесконечный циклянский
+    con = psycopg2.connect(user='django', host='192.168.1.3', database='cpu', password='django')
+    cur = con.cursor()
     for id in devices: # Цикл по девайсам
         dvt = {} # Буфер для данных
         for r in registers: # Цикл по регистрам
@@ -178,5 +179,7 @@ while True: # Бесконечный циклянский
         con.commit()
         ser.flushInput()
         ser.flushOutput()
+    cur.close()
+    con.close()
 
 ser.close() # Зашил порт, по идее ни когда не выполнится.

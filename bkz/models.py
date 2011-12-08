@@ -32,13 +32,13 @@ class relsib(models.Model):
 
 
 class dvt21(relsib):
-    position = u'Камера 2 Позиция 11'
+    position = u'Камера 2 Позиция 9'
     class Meta:
         verbose_name = u'dvt21'
 
 
 class dvt22(relsib):
-    position = u'Камера 2 Позиция 15'
+    position = u'Камера 1 Позиция 9'
     class Meta:
         verbose_name = u'dvt22'
 
@@ -53,12 +53,14 @@ class termodat22m(models.Model):
     t4 = models.FloatField(verbose_name=u"гор 606", null=True)
     t5 = models.FloatField(verbose_name=u"гор 206", null=True)
     t6 = models.FloatField(verbose_name=u"гор 506", null=True)
-    t7 = models.FloatField(verbose_name=u"", null=True)
-    t8 = models.FloatField(verbose_name=u"", null=True)
-    t9 = models.FloatField(verbose_name=u"", null=True)
+    t7 = models.FloatField(verbose_name=u"давл 401", null=True)
+    t8 = models.FloatField(verbose_name=u"разр 502", null=True)
+    t9 = models.FloatField(verbose_name=u"разр 602", null=True)
+
     t10 = models.FloatField(verbose_name=u"", null=True)
     t11 = models.FloatField(verbose_name=u"", null=True)
     t12 = models.FloatField(verbose_name=u"", null=True)
+
     t13 = models.FloatField(verbose_name=u"", null=True)
     t14 = models.FloatField(verbose_name=u"", null=True)
     t15 = models.FloatField(verbose_name=u"", null=True)
@@ -89,7 +91,10 @@ class chartform(forms.Form):
     ('t3',u"гор 306"),
     ('t4',u"гор 606"),
     ('t5',u"гор 206"),
-    ('t6',u"гор 506"),)
+    ('t6',u"гор 506"),
+    ('t7',u"давление 401"),
+    ('t8',u"разр 502"),
+    ('t9',u"разр 602"),)
     avg_c =(
         ('minute','Минутам'),
         ('second','Секундам'),
