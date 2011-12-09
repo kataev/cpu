@@ -14,7 +14,7 @@
                 dojo.forEach(result, function(item) {
                     var e = dojo.byId(item.model);
                     for (var d in item) {
-                        dojo.query('.' + d).forEach(function(i) { i.innerHTML = item[d]; });
+                        dojo.query('.' + d,e).forEach(function(i) {if (i !=undefined){ i.innerHTML = item[d];} });
                     }
                 });
             });
@@ -44,11 +44,11 @@
 <body>
 <a href='chart/'>График</a><span id='date'></span>
 <h2>Релсиб</h2>
-<table id='dvt'>
+<table>
     <tr>
         <th>Позиция</th>
-        <th class='hmdt'>Влаж</th>
-        <th class='temp'>Темп</th>
+        <th>Влаж</th>
+        <th>Темп</th>
     </tr>
     {% for a in dvt %}
         <tr id='{{ a }}'>
@@ -59,7 +59,7 @@
     {% endfor %}
 </table>
 <h2>Термодат</h2>
-<table id='termodat'>
+<table id='termodat22m'>
     {% for a in termodat %}
         <thead>
         <tr>
@@ -76,14 +76,14 @@
         </tr>
         </tfoot>
         <thead>
-        <tr id='{{ a.model }}'>
+        <tr>
             <th>Сушка</th>
             {% for f in a.fields %}
                 {% if f.name == 't7' %}
                     </tr></thead><tfoot><tr><th>Обжиг</th>
                 {% endif %}
                 {% if f.verbose_name %}
-                    <td class='{{ f.name }}'></td>
+                    <td title='{{ f.name }}' class='{{ f.name }}'></td>
                 {% endif %}
             {% endfor %}
         </tr>
