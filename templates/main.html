@@ -1,44 +1,32 @@
+<!DOCTYPE html>
 <html dir="ltr">
 <head>
-    <!DOCTYPE html>
     <meta charset="UTF-8">
     <title>CPU</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.6/dojo/dojo.js">
-    </script>
-    <script src="../dojo/dojo.js" djConfig="parseOnLoad: true,locale: 'ru'">
-    </script>
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.0/dojo/dojo.js" type="text/javascript"></script>
     <script type="text/javascript">
-        function foo() {
+        var refresh = function(){
             var get = new dojo.xhrGet({
                         handleAs: "json",
                         url: "./last/"
                     }).then(function(result) {
+                dojo.byId('date').innerHTML= result[0].date.split('.')[0].replace('T',' ');
                 dojo.forEach(result, function(item) {
-                    dojo.byId('date').innerHTML=item.fields.date
-
-                    var e = dojo.byId(item.model.split('.')[1]);
-                    for (var d in item.fields) {
-                        dojo.query('.' + d, e).forEach(function(i) {
-                            if (i != undefined) {
-                                i.innerHTML = item.fields[d];
-                            }
-                        });
+                    var e = dojo.byId(item.model);
+                    for (var d in item) {
+                        dojo.query('.' + d).forEach(function(i) { i.innerHTML = item[d]; });
                     }
                 });
-
-            }, function(e) {
-                return;
             });
-        }
-
-        dojo.addOnLoad(function() {
-            timer = setInterval(foo, 5000)
-//                        s = null;
-                    foo()
-
-        });
+            setTimeout(refresh,10000);
+        };
+        dojo.addOnLoad(refresh);
     </script>
     <style>
+        #date {margin-left: 20px; border: black 1px dashed;}
+
+        h2 {font-size: 18px; margin: 2px; padding: 2px;}
+
         table {
             border-collapse: collapse;
             border: black 1px solid;
@@ -46,24 +34,16 @@
 
         table td, th {
             border: black 1px solid;
-            width: 60px;
+            /*width: 70px;*/
             text-align: center;
         }
-
-        .hmdt {
-            color: blue;
-        }
-
-        .temp {
-            color: red;
-        }
-
+        .hmdt { color: blue; }
+        .temp { color: red; }
     </style>
 </head>
 <body>
-<a href='chart/'>График</a>
-Релсиб
-<span id='date'></span>
+<a href='chart/'>График</a><span id='date'></span>
+<h2>Релсиб</h2>
 <table id='dvt'>
     <tr>
         <th>Позиция</th>
@@ -72,33 +52,42 @@
     </tr>
     {% for a in dvt %}
         <tr id='{{ a }}'>
-            <td>{{ a.position }}</td>
+            <th>{{ a.position }}</th>
             <td class='hmdt'></td>
             <td class='temp'></td>
         </tr>
     {% endfor %}
 </table>
-Термодат
+<h2>Термодат</h2>
 <table id='termodat'>
     {% for a in termodat %}
+        <thead>
         <tr>
             <th>Позиция</th>
             {% for f in a.fields %}
+                {% if f.name == 't7' %}
+                    </tr></thead><tfoot><tr><th>Позиция</th>
+                {% endif %}
                 {% if f.verbose_name %}
                     <th>{{ f.verbose_name }}</th>
-{#        {% else %}#}
-{#            <th>{{ f.name }}</th>#}
                 {% endif %}
+
             {% endfor %}
         </tr>
+        </tfoot>
+        <thead>
         <tr id='{{ a.model }}'>
-            <th>Данные</th>
+            <th>Сушка</th>
             {% for f in a.fields %}
+                {% if f.name == 't7' %}
+                    </tr></thead><tfoot><tr><th>Обжиг</th>
+                {% endif %}
                 {% if f.verbose_name %}
                     <td class='{{ f.name }}'></td>
                 {% endif %}
             {% endfor %}
         </tr>
+        </tfoot>
     {% endfor %}
 </table>
 </body>

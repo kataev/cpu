@@ -24,34 +24,15 @@ def data(request,model):
         return HttpResponse(simplejson.dumps(s))
     else:
         return HttpResponse(simplejson.dumps(form.errors))
-        
-
-
 
 def last(request):
-    list = [dvt21,dvt22,termodat22m]
-
-    j = []
-    try:
-        for a in list:
-            print len(j),a,a.objects.latest('date')
-            j.append(a.objects.latest('date'))
-    except :
-        pass
-
-    return HttpResponse(serializers.serialize('json',j), mimetype='application/json')
+    data = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
+    data = map(lambda x: x.show(),data)
+    return HttpResponse(simplejson.dumps(data), mimetype='application/json')
 
 
 def main(request):
-    pos = Positions.objects.all()
-    w = {}
-    for a in pos:
-        w[a.name] = {}
-    for a in pos:
-        w[a.name][a.field] = a.name
-
-
-    a= {'termodat':[{'model':termodat22m,'fields':termodat22m._meta.fields[2:]}],'dvt':[dvt22,dvt21,],'names':w}
+    a= {'termodat':[{'model':termodat22m,'fields':termodat22m._meta.fields[2:]}],'dvt':[dvt22,dvt21,]}
 
     return render(request, 'main.html',a)
 

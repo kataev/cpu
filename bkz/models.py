@@ -9,44 +9,33 @@ class relsib(models.Model):
     hmdt = models.FloatField(verbose_name="Влажность", null=True)
     temp = models.FloatField(verbose_name="Температура", null=True)
 
-    def get_hmdt(self):
-        return {'x': self.position, 'y': self.hmdt}
-
-    def get_temp(self):
-        return {'x': self.position, 'y': self.temp}
+    def __unicode__(self):
+        return self._meta.module_name
 
     def show(self):
-        return {'date': str(self.date), 'hmdt': self.hmdt, 'temp': self.temp, 'position': self.position}
-
-    def get_full_info(self):
-        return {'date': self.date, 'hmdt': self.hmdt, 'temp': self.temp}
-
-    def get_position(self):
-        return self.position
+        return {'date':self.date.isoformat(),'hmdt':self.hmdt,'temp':self.temp,'model':self._meta.module_name}
 
     class Meta:
         abstract = True
-
-    def __unicode__(self):
-        return self._meta.verbose_name
-
+        ordering = ('-date')
 
 class dvt21(relsib):
     position = u'Камера 2 Позиция 9'
+
     class Meta:
         verbose_name = u'dvt21'
 
 
 class dvt22(relsib):
     position = u'Камера 1 Позиция 9'
+
     class Meta:
         verbose_name = u'dvt22'
 
-class Positions(models.Model):
-    name = models.CharField(max_length=100)
-    field = models.CharField(max_length=100)
-    position = models.CharField(max_length=100)
-
+#class Positions(models.Model):
+#    name = models.CharField(max_length=100)
+#    field = models.CharField(max_length=100)
+#    position = models.CharField(max_length=100)
 
 class termodat22m(models.Model):
     position = 'Термодат'
@@ -78,72 +67,14 @@ class termodat22m(models.Model):
     t22 = models.FloatField(verbose_name=u"", null=True)
     t23 = models.FloatField(verbose_name=u"", null=True)
     t24 = models.FloatField(verbose_name=u"", null=True)
-    class Meta:
-        verbose_name = 'termodat22m'
 
     def __unicode__(self):
-        return self._meta.verbose_name
+        return self._meta.module_name
 
-
-
-
-
-class dvt21Store(Store):
-    id=StoreField()
-    date = StoreField(get_value=ValueMethod('strftime', '%Y-%m-%d %H:%M'))
-    temp = StoreField()
-    hmdt = StoreField()
-#    position = StoreField(get_value=ObjectMethod('get_position'))
-
-    class Meta(object):
-#        objects = [dvt21.objects.latest('id')]
-#        objects = dvt21.objects.order_by('date').reverse().all()[:50]
-        label = None
-
-class dvt22Store(Store):
-    id=StoreField()
-    date = StoreField(get_value=ValueMethod('strftime', '%Y-%m-%d %H:%M'))
-    temp = StoreField()
-    hmdt = StoreField()
-#    position = StoreField(get_value=ObjectMethod('get_position'))
-
-    class Meta(object):
-#        objects = [dvt22.objects.latest('id')]
-#        objects = dvt22.objects.order_by('date').reverse().all()[:50]
-        label = None
-class termodat22mStore(Store):
-    id=StoreField()
-    date = StoreField(get_value=ValueMethod('strftime', '%Y-%m-%d %H:%M'))
-    t1=StoreField()
-    t2=StoreField()
-    t3=StoreField()
-    t4=StoreField()
-    t5=StoreField()
-    t6=StoreField()
-    t7=StoreField()
-    t8=StoreField()
-    t9=StoreField()
-    t10=StoreField()
-    t11=StoreField()
-    t12=StoreField()
-    t13=StoreField()
-    t14=StoreField()
-    t15=StoreField()
-    t16=StoreField()
-    t17=StoreField()
-    t18=StoreField()
-    t19=StoreField()
-    t20=StoreField()
-    t21=StoreField()
-    t22=StoreField()
-    t23=StoreField()
-    t24=StoreField()
-
-#    hmdt = StoreField()
-#    position = StoreField(get_value=ObjectMethod('get_position'))
-
-    class Meta(object):
-#        objects = [termodat22m.objects.latest('id')]
-#        objects = termodat22m.objects.order_by('date').reverse().all()[:50]
-        label=None
-#        label = termodat22m._meta.verbose_name
+    def show(self):
+        d = {}
+        for t in range(1,24):
+            d['t%d' % t] = getattr(self,'t%d' % t)
+        d['date'] = self.date.isoformat()
+        d['model'] = self._meta.module_name
+        return d
