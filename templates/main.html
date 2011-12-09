@@ -10,11 +10,10 @@
                         handleAs: "json",
                         url: "./last/"
                     }).then(function(result) {
-                dojo.byId('date').innerHTML= result[0].date.split('.')[0].replace('T',' ');
                 dojo.forEach(result, function(item) {
-                    var e = dojo.byId(item.model);
-                    for (var d in item) {
-                        dojo.query('.' + d,e).forEach(function(i) {if (i !=undefined){ i.innerHTML = item[d];} });
+                    for (var f in item){
+                            var node = dojo.byId(item.model+f);
+                            if (node) node.innerHTML = item[f]
                     }
                 });
             });
@@ -31,8 +30,9 @@
             border-collapse: collapse;
             border: black 1px solid;
         }
-
         table td, th {
+            padding-left: 4px;
+            padding-right: 4px;
             border: black 1px solid;
             /*width: 70px;*/
             text-align: center;
@@ -42,53 +42,36 @@
     </style>
 </head>
 <body>
-<a href='chart/'>График</a><span id='date'></span>
-<h2>Релсиб</h2>
 <table>
-    <tr>
-        <th>Позиция</th>
-        <th>Влаж</th>
-        <th>Темп</th>
-    </tr>
-    {% for a in dvt %}
-        <tr id='{{ a }}'>
-            <th>{{ a.position }}</th>
-            <td class='hmdt'></td>
-            <td class='temp'></td>
-        </tr>
-    {% endfor %}
-</table>
-<h2>Термодат</h2>
-<table id='termodat22m'>
-    {% for a in termodat %}
-        <thead>
+<caption>Сушка</caption>
+<thead>
+<tr><th>Позиция</th><th>Влаж</th>
+<th>Темп</th>
+</tr>
+</thead>
+<tbody>
+{% for a in pos.dvt %}
         <tr>
-            <th>Позиция</th>
-            {% for f in a.fields %}
-                {% if f.name == 't7' %}
-                    </tr></thead><tfoot><tr><th>Позиция</th>
-                {% endif %}
-                {% if f.verbose_name %}
-                    <th>{{ f.verbose_name }}</th>
-                {% endif %}
+            <th>{{ a.place|capfirst }} позиция {{ a.pos }}</th>
+            <td id='{{ a.name }}hmdt' class='hmdt'></td>
+            <td id='{{ a.name }}temp' class='temp'></td>
+        </tr>
+{% endfor %}
 
-            {% endfor %}
-        </tr>
-        </tfoot>
-        <thead>
+<table class='termodat'>
+<caption>Сушка</caption>
+{% for a in pos.termodat22m %}
         <tr>
-            <th>Сушка</th>
-            {% for f in a.fields %}
-                {% if f.name == 't7' %}
-                    </tr></thead><tfoot><tr><th>Обжиг</th>
-                {% endif %}
-                {% if f.verbose_name %}
-                    <td title='{{ f.name }}' class='{{ f.name }}'></td>
-                {% endif %}
-            {% endfor %}
+            <th>{{ a.pos|capfirst }}</th>
+            <td title='{{ a.field }}' id='termodat22m{{ a.field }}'></td>
         </tr>
-        </tfoot>
-    {% endfor %}
+    {% if a.field == 't7' %}
+        </table><table class='termodat'><caption>Обжиг</caption>
+    {% endif %}
+{% endfor %}
+</table>
+
+</tbody>
 </table>
 </body>
 </html>

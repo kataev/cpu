@@ -8,6 +8,15 @@ import qsstats
 from django.db.models import Avg
 import datetime
 
+def positions(request):
+    dvt = Positions.objects.filter(name__startswith='dvt')
+    pos = {}
+    pos['dvt'] = map(lambda p: {'name':p.name,'place':p.get_place_display(),'pos':p.position},dvt)
+    ter = Positions.objects.filter(name__startswith='termodat')
+    pos['termodat22m'] = map(lambda p: {'field':p.field,'place':p.get_place_display(),'pos':p.position},ter)
+    pos['termodat22m'].sort(key=lambda x:int(x['field'].split('t')[1]))
+    return HttpResponse(simplejson.dumps(pos))
+
 def data(request,model):
     form = ChartForm(request.GET)
     if form.is_valid():
@@ -32,9 +41,13 @@ def last(request):
 
 
 def main(request):
-    a= {'termodat':[{'model':termodat22m,'fields':termodat22m._meta.fields[2:]}],'dvt':[dvt22,dvt21,]}
-
-    return render(request, 'main.html',a)
+    dvt = Positions.objects.filter(name__startswith='dvt').order_by('place')
+    pos = {}
+    pos['dvt'] = map(lambda p: {'name':p.name,'place':p.get_place_display(),'pos':p.position},dvt)
+    ter = Positions.objects.filter(name__startswith='termodat')
+    pos['termodat22m'] = map(lambda p: {'field':p.field,'place':p.get_place_display(),'pos':p.position},ter)
+    pos['termodat22m'].sort(key=lambda x:int(x['field'].split('t')[1]))
+    return render(request,'main.html',{'pos':pos})
 
 def chart(request):
     return render(request, 'chart.html',{'form':ChartForm()})

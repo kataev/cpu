@@ -2,7 +2,7 @@
 from django.db import models
 import dojango.forms as forms
 from dojango.data.modelstore import  *
-
+from django.db.models.loading import get_models
 
 class relsib(models.Model):
     date = models.DateTimeField(verbose_name="Дата", auto_now_add=True)
@@ -32,11 +32,6 @@ class dvt22(relsib):
     class Meta:
         verbose_name = u'dvt22'
 
-#class Positions(models.Model):
-#    name = models.CharField(max_length=100)
-#    field = models.CharField(max_length=100)
-#    position = models.CharField(max_length=100)
-
 class termodat22m(models.Model):
     position = 'Термодат'
 
@@ -47,6 +42,7 @@ class termodat22m(models.Model):
     t4 = models.FloatField(verbose_name=u"гор 606", null=True)
     t5 = models.FloatField(verbose_name=u"гор 206", null=True)
     t6 = models.FloatField(verbose_name=u"гор 506", null=True)
+    
     t7 = models.FloatField(verbose_name=u"давл 401", null=True)
     t8 = models.FloatField(verbose_name=u"разр 502", null=True)
     t9 = models.FloatField(verbose_name=u"разр 602", null=True)
@@ -78,3 +74,32 @@ class termodat22m(models.Model):
         d['date'] = self.date.isoformat()
         d['model'] = self._meta.module_name
         return d
+
+places = (
+    (u'firing',u'обжиговая печь'),
+    (u'drying_1',u'сушка 1'),
+    (u'drying_2',u'сушка 2'),
+)
+
+
+devices = map(lambda m: (m._meta.module_name,m._meta.verbose_name,),filter(lambda m: m._meta.app_label in 'bkz',get_models()))
+
+class Positions(models.Model):
+    name = models.CharField(max_length=100,choices=devices)
+    field = models.CharField(max_length=100,null=True,blank=True)
+    place = models.CharField(max_length=50,choices=places,null=True,blank=True)
+    position = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name=u'позиция точек и датчиков'
+        verbose_name_plural=u'позиции точек и датчиков'
+
+    def __unicode__(self):
+        if self.field:
+            name = u'%s %s' % (self.get_name_display(),self.field)
+        else:
+            name = self.get_name_display()
+        if self.place:
+            return u'%s в %s %s' % (name,self.get_place_display(),self.position)
+        else:
+            return u'%s %s' % (name,self.position)

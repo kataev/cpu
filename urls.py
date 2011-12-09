@@ -11,6 +11,8 @@ urlpatterns = patterns('',
 
     (r'^chart/$', 'cpu.views.chart'),
 
+    (r'^pos/$', 'cpu.views.positions'),
+
     (r'^admin/', include(admin.site.urls)),
     (r'^dojango/', include('dojango.urls')),
 )
