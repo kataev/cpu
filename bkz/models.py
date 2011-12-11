@@ -85,10 +85,13 @@ places = (
 devices = map(lambda m: (m._meta.module_name,m._meta.verbose_name,),filter(lambda m: m._meta.app_label in 'bkz',get_models()))
 
 class Positions(models.Model):
-    name = models.CharField(max_length=100,choices=devices)
-    field = models.CharField(max_length=100,null=True,blank=True)
-    place = models.CharField(max_length=50,choices=places,null=True,blank=True)
-    position = models.CharField(max_length=100)
+    name = models.CharField(u'Имя устойства',max_length=100,choices=devices,)
+    field = models.CharField(u'Канал устойства',max_length=100,null=True,blank=True)
+    place = models.CharField(u'Раположение',max_length=50,choices=places,null=True,blank=True)
+    position = models.CharField(u'Позиция',max_length=100)
+
+    def show(self):
+        return dict(field=self.field,place=self.get_place_display(),position=self.position)
 
     class Meta:
         verbose_name=u'позиция точек и датчиков'

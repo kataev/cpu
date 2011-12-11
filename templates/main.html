@@ -3,75 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <title>CPU</title>
-    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.0/dojo/dojo.js" type="text/javascript"></script>
-    <script type="text/javascript">
-        var refresh = function(){
-            var get = new dojo.xhrGet({
-                        handleAs: "json",
-                        url: "./last/"
-                    }).then(function(result) {
-                dojo.forEach(result, function(item) {
-                    for (var f in item){
-                            var node = dojo.byId(item.model+f);
-                            if (node) node.innerHTML = item[f]
-                    }
-                });
-            });
-            setTimeout(refresh,10000);
-        };
-        dojo.addOnLoad(refresh);
+    <script src="/static/underscore-1.2.2.js"></script>
+    <script src="/static/jquery-1.6.4.js"></script>
+    <script src="/static/json2.js"></script>
+    <script src="/static/backbone.js"></script>
+    <script>
+        var positions = {{ pos|safe }}
+
+        var Unit = Backbone.Model.extend({
+            initialize:function(data){
+                this.set({date:new Date(data.date)});
+            },
+            get_label:function(field){
+                var d = positions[this.get('model')][field]
+                return  d ? d.place + ' позиция ' + d.pos : undefined
+            }
+        });
+
+        var Data = Backbone.Collection.extend({
+            url:'/last/',
+            model:Unit
+        });
+
+        var View = Backbone.View.extend({
+            tagName:'tr',
+            render: function(){
+                $(this.el).html('ololo')
+            }
+        })
+        window.data = new Data
+        window.data.reset({{ data|safe }})
+
+        
+
     </script>
-    <style>
-        #date {margin-left: 20px; border: black 1px dashed;}
 
-        h2 {font-size: 18px; margin: 2px; padding: 2px;}
 
-        table {
-            border-collapse: collapse;
-            border: black 1px solid;
-        }
-        table td, th {
-            padding-left: 4px;
-            padding-right: 4px;
-            border: black 1px solid;
-            /*width: 70px;*/
-            text-align: center;
-        }
-        .hmdt { color: blue; }
-        .temp { color: red; }
-    </style>
 </head>
 <body>
-<table>
-<caption>Сушка</caption>
-<thead>
-<tr><th>Позиция</th><th>Влаж</th>
-<th>Темп</th>
-</tr>
-</thead>
-<tbody>
-{% for a in pos.dvt %}
-        <tr>
-            <th>{{ a.place|capfirst }} позиция {{ a.pos }}</th>
-            <td id='{{ a.name }}hmdt' class='hmdt'></td>
-            <td id='{{ a.name }}temp' class='temp'></td>
-        </tr>
-{% endfor %}
-
-<table class='termodat'>
-<caption>Сушка</caption>
-{% for a in pos.termodat22m %}
-        <tr>
-            <th>{{ a.pos|capfirst }}</th>
-            <td title='{{ a.field }}' id='termodat22m{{ a.field }}'></td>
-        </tr>
-    {% if a.field == 't7' %}
-        </table><table class='termodat'><caption>Обжиг</caption>
-    {% endif %}
-{% endfor %}
-</table>
-
-</tbody>
-</table>
 </body>
 </html>
