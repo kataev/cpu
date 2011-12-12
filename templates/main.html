@@ -8,6 +8,16 @@
     <script src="/static/jquery.sparkline.min.js"></script>
     <script src="/static/json2.js"></script>
     <script src="/static/backbone.js"></script>
+    <script type="text/template" id="group-template">
+        <div class="column" id="<%- id %>">
+            <h1><%- pos %></h1>
+        </div>
+    </script>
+    <script type="text/template" id="view-template">
+        <h2><%- label %></h2>
+        <div class='value'><%- value %></div>
+        <div class='spark'></div>
+    </script>
     <script>
         window.Backbone = Backbone;
         var positions = {{ pos|safe }}
@@ -20,7 +30,7 @@
                 this.query=[0,0,0,0,0,0,0,0,0,0];
             },
             label:function() {
-                id = this.get('id').split('.');
+                id = this.get('id').split('_');
                 var d = positions[id[0]][id[1]];
                 return  d ? d.place + ' ' + d.pos : undefinedж;
             },
@@ -40,7 +50,7 @@
                 this.model.bind('change:value',this.changeValue);
                 this.model.view = this;
             },
-            template: _.template("<div><%- label %></div><div class='value'> <%- value %> </div> <div class='spark'></div>"),
+            template: _.template($('#view-template').html()),
             tagName:'div',
             className:'cpu',
             render: function() {
@@ -63,9 +73,9 @@
             },
             root:function() {
                 window.data.each(function(model) {
-                    var v = new View({model:model});
+                    var el = $('#'+model.get('id'));
+                    var v = new View({model:model,el:el});
                     v.render();
-                    $('body').append(v.el)
                 });
             }
         });
@@ -79,14 +89,40 @@
             setTimeout(refresh,5000);
         }
 
+        var draw = function(){
+            var w = [];
+            var template = _.template($('#group-template').html());
+            for (var m in positions){
+                for (var a in positions[m]){
+                    var p = positions[m][a].p;
+                    var place = positions[m][a].place;
+                    var id = m+'_'+a;
+                    w.push(id)
+                    var gr = $('#'+p).length ?  $('#'+p) : $(template({id:p,pos:place})).appendTo('body');
+                    $(gr).append(_.template('<div id="<%- id %>"></div>',{id:id}));
+                }
+            };
+            return w;
+        }
+
         $(function() {
+            draw()
             new WorkSpace;
             Backbone.history.start();
             refresh();
         });
     </script>
     <style>
-        .value {float:left;}
+        .column {position: absolute; width: 200px;top:0;}
+
+        #drying_1 {left:200px;}
+        #drying_2 {left:400px;}
+        #firing {left:0;}
+
+        h1 {font-size: 20px;text-align: center;}
+        h2 {font-size: 18px}
+
+        .value {float:left;padding-left: 5px;}
         .spark {width:100px;height:20px;margin-left: 50px;}
     </style>
 
