@@ -76,9 +76,9 @@ class termodat22m(models.Model):
         return d
 
 places = (
-    (u'firing',u'обжиговая печь'),
-    (u'drying_1',u'сушка 1'),
-    (u'drying_2',u'сушка 2'),
+    (u'firing',u'Обжиг'),
+    (u'drying_1',u'Сушка 1'),
+    (u'drying_2',u'Сушка 2'),
 )
 
 

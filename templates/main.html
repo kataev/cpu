@@ -5,18 +5,27 @@
     <title>CPU</title>
     <script src="/static/underscore-1.2.2.js"></script>
     <script src="/static/jquery-1.6.4.js"></script>
+    <script src="/static/jquery.sparkline.min.js"></script>
     <script src="/static/json2.js"></script>
     <script src="/static/backbone.js"></script>
     <script>
+        window.Backbone = Backbone;
         var positions = {{ pos|safe }}
 
         var Unit = Backbone.Model.extend({
-            initialize:function(data){
+            initialize:function(data) {
+                this.set({label:this.label()})
                 this.set({date:new Date(data.date)});
+                this.bind('change:value',this.changeValue);
+                this.query=[0,0,0,0,0,0,0,0,0,0];
             },
-            get_label:function(field){
-                var d = positions[this.get('model')][field]
-                return  d ? d.place + ' позиция ' + d.pos : undefined
+            label:function() {
+                id = this.get('id').split('.');
+                var d = positions[id[0]][id[1]];
+                return  d ? d.place + ' ' + d.pos : undefinedж;
+            },
+            changeValue:function(){
+               this.query = _(this.query).chain().slice(1).push(this.get('value')).value();
             }
         });
 
@@ -26,18 +35,60 @@
         });
 
         var View = Backbone.View.extend({
-            tagName:'tr',
-            render: function(){
-                $(this.el).html('ololo')
+            initialize: function(args){
+                _.bindAll(this,'changeValue');
+                this.model.bind('change:value',this.changeValue);
+                this.model.view = this;
+            },
+            template: _.template("<div><%- label %></div><div class='value'> <%- value %> </div> <div class='spark'></div>"),
+            tagName:'div',
+            className:'cpu',
+            render: function() {
+                $(this.el).html(this.template(this.model.toJSON()));
+                this.$('.spark').sparkline(this.model.query,{width:'100px'});
+                return this;
+            },
+            changeValue:function(val){
+                this.$('.value').html(this.model.get('value'));
+                this.$('.spark').sparkline(this.model.query,{width:'100px'});
+                this.$('.spark').attr('title',this.model.query.toString())
             }
-        })
+        });
         window.data = new Data
-        window.data.reset({{ data|safe }})
+        window.data.reset({{ data|safe }});
 
-        
+        var WorkSpace = Backbone.Router.extend({
+            routes:{
+                '!/':'root'
+            },
+            root:function() {
+                window.data.each(function(model) {
+                    var v = new View({model:model});
+                    v.render();
+                    $('body').append(v.el)
+                });
+            }
+        });
 
+        var refresh = function(){
+            $.getJSON('/last/').success(function(json){
+                _.forEach(json,function(d){
+                    data.get(d.id).set({value:d.value});
+                });
+            });
+            setTimeout(refresh,5000);
+        }
+
+        $(function() {
+            new WorkSpace;
+            Backbone.history.start();
+            refresh();
+        });
     </script>
-
+    <style>
+        .value {float:left;}
+        .spark {width:100px;height:20px;margin-left: 50px;}
+    </style>
 
 </head>
 <body>

@@ -26,8 +26,15 @@ def data(request,model):
         return HttpResponse(simplejson.dumps(form.errors))
 
 def last(request):
-    data = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
-    data = map(lambda x: x.show(),data)
+    models = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
+    data = []
+
+    for m in models:
+        for f in m._meta.fields:
+            if f.name in ('date','id'): continue
+            if getattr(m,f.name):
+                data.append(dict(value=getattr(m,f.name),id='%s.%s' % (m._meta.module_name,f.name)))
+
     return HttpResponse(simplejson.dumps(data), mimetype='application/json')
 
 
@@ -38,8 +45,15 @@ def main(request):
         d[p.field] = dict(place = p.get_place_display(), pos = p.position)
         pos[p.name]=d
 
-    data = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
-    data = map(lambda x: x.show(),data)
+    models = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
+    data = []
+
+    for m in models:
+        for f in m._meta.fields:
+            if f.name in ('date','id'): continue
+            if getattr(m,f.name):
+                data.append(dict(value=getattr(m,f.name),id='%s.%s' % (m._meta.module_name,f.name)))
+            
     return render(request,'main.html',{'pos':simplejson.dumps(pos),'data':simplejson.dumps(data)})
 
 def chart(request):
