@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>CPU</title>
+    <link href="/static/style.css" rel="stylesheet">
     <script src="/static/underscore-1.2.2.js"></script>
     <script src="/static/jquery-1.6.4.js"></script>
     <script src="/static/jquery.sparkline.min.js"></script>
@@ -14,8 +15,7 @@
         </div>
     </script>
     <script type="text/template" id="view-template">
-        <h2><%- label %></h2>
-        <div class='value'><%- value %></div>
+        <div class='header'><h2><%- label %></h2><span><%- value %></span></div>
         <div class='spark'></div>
     </script>
     <script>
@@ -24,18 +24,27 @@
 
         var Unit = Backbone.Model.extend({
             initialize:function(data) {
-                this.set({label:this.label()})
+                this.set({label:this.label()});
                 this.set({date:new Date(data.date)});
-                this.bind('change:value',this.changeValue);
-                this.query=[0,0,0,0,0,0,0,0,0,0];
+                this.bind('change:value', this.changeValue);
+                this.query = [0,0,0,0,0,0,0,0,0,0];
+                this.q = [];
             },
             label:function() {
                 id = this.get('id').split('_');
                 var d = positions[id[0]][id[1]];
-                return  d ? d.place + ' ' + d.pos : undefinedж;
+                return  d ? d.pos : undefined;
             },
-            changeValue:function(){
-               this.query = _(this.query).chain().slice(1).push(this.get('value')).value();
+            changeValue:function() {
+                if (this.q.length == 10) {
+                    var val = _(this.q).reduce(function(memo,num){ return memo + num }) / 10;
+                    this.q = [];
+                    this.query = _(this.query).chain().slice(1).push(val.toFixed(1)).value();
+                }
+                else {
+                    this.q.push(this.get('value'));
+                }
+
             }
         });
 
@@ -45,23 +54,31 @@
         });
 
         var View = Backbone.View.extend({
-            initialize: function(args){
-                _.bindAll(this,'changeValue');
-                this.model.bind('change:value',this.changeValue);
+            initialize: function(args) {
+                _.bindAll(this, 'changeValue');
+                this.model.bind('change:value', this.changeValue);
                 this.model.view = this;
+                if (this.model.get('id').split('_')[1] == 'temp') {
+                    $(this.el).addClass('temp')
+                }
             },
             template: _.template($('#view-template').html()),
             tagName:'div',
             className:'cpu',
             render: function() {
                 $(this.el).html(this.template(this.model.toJSON()));
-                this.$('.spark').sparkline(this.model.query,{width:'100px'});
+                this.$('.spark').sparkline(this.model.query, {width:'100px'});
                 return this;
             },
-            changeValue:function(val){
-                this.$('.value').html(this.model.get('value'));
-                this.$('.spark').sparkline(this.model.query,{width:'100px'});
-                this.$('.spark').attr('title',this.model.query.toString())
+            changeValue:function(val) {
+                this.$('span').html(this.model.get('value').toFixed(1));
+
+                var color = this.model.get('id').split('_')[1] == 'hmdt' ? '#4e6aff' : '#ff7b4c';
+                this.$('.spark').sparkline(this.model.query, {width:'100px',fillColor:color});
+
+                this.$('.spark').append('<span class="max">' + _(this.model.query).max().toFixed(1) + '</span>');
+                this.$('.spark').append('<span class="min">' + _(this.model.query).min().toFixed(1) + '</span>');
+//                this.$('.spark').attr('title',this.model.query.toString())
             }
         });
         window.data = new Data
@@ -73,59 +90,55 @@
             },
             root:function() {
                 window.data.each(function(model) {
-                    var el = $('#'+model.get('id'));
+                    var el = $('#' + model.get('id'));
                     var v = new View({model:model,el:el});
                     v.render();
                 });
             }
         });
 
-        var refresh = function(){
-            $.getJSON('/last/').success(function(json){
-                _.forEach(json,function(d){
+        var refresh = function() {
+            $.getJSON('/last/').success(function(json) {
+                _.forEach(json, function(d) {
                     data.get(d.id).set({value:d.value});
                 });
             });
-            setTimeout(refresh,5000);
-        }
+            setTimeout(refresh, 6000);
+        };
 
-        var draw = function(){
+        var draw = function() {
             var w = [];
             var template = _.template($('#group-template').html());
-            for (var m in positions){
-                for (var a in positions[m]){
+            for (var m in positions) {
+                for (var a in positions[m]) {
                     var p = positions[m][a].p;
                     var place = positions[m][a].place;
-                    var id = m+'_'+a;
-                    w.push(id)
-                    var gr = $('#'+p).length ?  $('#'+p) : $(template({id:p,pos:place})).appendTo('body');
-                    $(gr).append(_.template('<div id="<%- id %>"></div>',{id:id}));
+                    var id = m + '_' + a;
+                    var gr = $('#' + p).length ? $('#' + p) : $(template({id:p,pos:place})).appendTo('body');
+                    var el = $(_.template('<div id="<%- id %>"></div>', {id:id})).appendTo(gr);
+                    w.push({gr:gr,el:el,a:a,m:m,p:p})
                 }
-            };
+                ;
+            }
+            ;
+            var s = _(w).chain().filter(function(e) { return e.m == 'termodat22m' && e.p == 'firing' })
+                        .sortBy( function(e) { return parseInt(e.a.slice(1)) }).value()
+            _(s).each(function(e, key) {
+                if (key == 0) {return;}
+                else {
+                    $(s[key-1].el).after($(e.el));
+                }
+            });
             return w;
         }
 
         $(function() {
-            draw()
+            window.elems = draw();
             new WorkSpace;
             Backbone.history.start();
             refresh();
         });
     </script>
-    <style>
-        .column {position: absolute; width: 200px;top:0;}
-
-        #drying_1 {left:200px;}
-        #drying_2 {left:400px;}
-        #firing {left:0;}
-
-        h1 {font-size: 20px;text-align: center;}
-        h2 {font-size: 18px}
-
-        .value {float:left;padding-left: 5px;}
-        .spark {width:100px;height:20px;margin-left: 50px;}
-    </style>
-
 </head>
 <body>
 </body>

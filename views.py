@@ -26,10 +26,8 @@ def data(request,model):
         return HttpResponse(simplejson.dumps(form.errors))
 
 def last(request):
-    models = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
     data = []
-
-    for m in models:
+    for m in (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk')):
         for f in m._meta.fields:
             if f.name in ('date','id'): continue
             if getattr(m,f.name):
@@ -48,7 +46,12 @@ def main(request):
     models = (dvt21.objects.latest('pk'),dvt22.objects.latest('pk'),termodat22m.objects.latest('pk'))
     data = []
 
+    start = datetime.datetime.now() - datetime.timedelta(0,0,0,0,10)
+    end = datetime.datetime.now()
+
     for m in models:
+#        qss = qsstats.QuerySetStats(m.objects.all(),'date')
+#        query = qss.time_series(start,end,aggregate=Avg(f.name),interval='minutes')
         for f in m._meta.fields:
             if f.name in ('date','id'): continue
             if getattr(m,f.name):

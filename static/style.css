@@ -1,0 +1,40 @@
+.column {
+    position: absolute;
+    padding: 5px;
+    /*border: 1px gray solid;*/
+}
+
+#drying_1 {
+    left:200px;
+}
+
+#drying_2 {
+    left:392px;
+}
+
+#firing h1 {display: none;}
+
+.column>div {
+    border-top: 1px black solid;
+    width: 180px;
+    height: 36px;
+}
+
+div.header { width: 60px; height: 36px; float: left; }
+h1 { font-size: 14px; position: absolute; top: 100%; left:40%;margin: 0px;}
+h2 { font-size: 12px; padding: 0px; margin: 0px; white-space: nowrap; z-index: 100; }
+
+.temp span:after { content: "\B0" }
+
+.spark {
+    display: inline-block;
+    width: 100px;
+    /*height: 36px;*/
+    float: left;
+    margin-top: 10px;
+    position: relative;
+}
+
+.max { font-size: 8px; position: absolute; top: -2px; left: 100px; }
+
+.min { font-size: 8px; position: absolute; bottom: 0; left: 100px; }
