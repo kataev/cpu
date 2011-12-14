@@ -12,6 +12,30 @@
     left:392px;
 }
 
+#footer {
+    border: 1px black solid;
+    top:430px;
+    width: 572px;
+    height: 24px;
+    padding: 0px;
+}
+
+#form {
+    left:200px;
+    top:230px;
+    width:370px;
+    height: 20px;
+}
+
+#chart {
+    left:200px;
+    top:260px;
+    width:370px;
+    height: 150px;
+    border: 1px black solid;
+    padding: 0px
+}
+
 #firing h1 {display: none;}
 
 .column>div {
@@ -19,11 +43,13 @@
     width: 180px;
     height: 36px;
 }
+.column>div:last-child { border-bottom: 1px black solid;}
 
 div.header { width: 60px; height: 36px; float: left; }
 h1 { font-size: 14px; position: absolute; top: 100%; left:40%;margin: 0px;}
 h2 { font-size: 12px; padding: 0px; margin: 0px; white-space: nowrap; z-index: 100; }
 
+span {padding-left: 2px}
 .temp span:after { content: "\B0" }
 
 .spark {

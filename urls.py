@@ -5,7 +5,7 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    (r'^termodat/$','cpu.views.data',{'model':termodat22m}),
+    (r'^data/$','cpu.views.data'),
     (r'^last/$', 'cpu.views.last'),
     (r'^$', 'cpu.views.main'),
 

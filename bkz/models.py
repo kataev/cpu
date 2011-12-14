@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-import dojango.forms as forms
-from dojango.data.modelstore import  *
 from django.db.models.loading import get_models
 
 class relsib(models.Model):

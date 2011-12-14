@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 __author__ = 'bteam'
 from dojango import forms
-import datetime
+from django.db.models.loading import get_models
 
+models = map(lambda m: (m._meta.module_name,m._meta.verbose_name),filter(lambda m: m._meta.app_label in 'bkz' and m._meta.module_name != 'positions',get_models()))
 class ChartForm(forms.Form):
     value_c = (
     ('hmdt', u'Влажность'),
@@ -31,7 +32,7 @@ class ChartForm(forms.Form):
         ('hours','Часам'),
         ('days','Дням'),
     )
-    
+    model = forms.ChoiceField(choices=models,label=u'Устройство')
     aggregate = forms.ChoiceField(choices=value_c,label=u'Значения')
     interval = forms.ChoiceField(choices=avg_c,label=u'Усреднять',required=False)
     start = forms.DateTimeField(required=False, label=u'Начало отсчета')

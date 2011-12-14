@@ -18,17 +18,23 @@
         <div class='header'><h2><%- label %></h2><span><%- value %></span></div>
         <div class='spark'></div>
     </script>
+    <script type="text/template" id="select-template">
+        <select name='model'>
+
+        </select>
+    </script>
     <script>
         window.Backbone = Backbone;
         var positions = {{ pos|safe }}
+
+        var reload_time = 1000 * 60; // 1min
 
         var Unit = Backbone.Model.extend({
             initialize:function(data) {
                 this.set({label:this.label()});
                 this.set({date:new Date(data.date)});
                 this.bind('change:value', this.changeValue);
-                this.query = [0,0,0,0,0,0,0,0,0,0];
-                this.q = [];
+                this.query = this.get('query')
             },
             label:function() {
                 id = this.get('id').split('_');
@@ -36,17 +42,17 @@
                 return  d ? d.pos : undefined;
             },
             changeValue:function() {
-                if (this.q.length == 10) {
-                    var val = _(this.q).reduce(function(memo,num){ return memo + num }) / 10;
-                    this.q = [];
+                    var val = this.get('value')
                     this.query = _(this.query).chain().slice(1).push(val.toFixed(1)).value();
-                }
-                else {
-                    this.q.push(this.get('value'));
-                }
-
             }
         });
+
+        var Point = Backbone.Model.extend({ })
+
+        var Line = Backbone.Collection.extend({
+            model:Point,
+            url:'/data/'
+                                               })
 
         var Data = Backbone.Collection.extend({
             url:'/last/',
@@ -65,28 +71,42 @@
             template: _.template($('#view-template').html()),
             tagName:'div',
             className:'cpu',
+            events: {
+                'click .spark': 'show'
+            },
             render: function() {
                 $(this.el).html(this.template(this.model.toJSON()));
-                this.$('.spark').sparkline(this.model.query, {width:'100px'});
+                this.spark();
                 return this;
+            },
+            spark:function(){
+                var color = this.model.get('id').split('_')[1] == 'hmdt' ? '#4e6aff' : '#ff7b4c';
+                this.$('.spark').sparkline(this.model.query, {width:'100px',fillColor:color,lineColor:'black'});
+                this.$('.spark').append('<span class="max">' + _(this.model.query).max().toFixed(1) + '</span>');
+                this.$('.spark').append('<span class="min">' + _(this.model.query).min().toFixed(1) + '</span>');
             },
             changeValue:function(val) {
                 this.$('span').html(this.model.get('value').toFixed(1));
+            },
+            show: function(e){
+                var id = this.model.get('id');
+                var model = id.split('_')[0];
+                var aggregate = id.split('_')[1];
+                $.getJSON('/data/',{model:model,aggregate:aggregate}).success(function(data){
+                    var d =_(data).map(function(m){return m.value});
+                    $('#chart').sparkline(d,{width:'372px',height:'152px'});
+                })
 
-                var color = this.model.get('id').split('_')[1] == 'hmdt' ? '#4e6aff' : '#ff7b4c';
-                this.$('.spark').sparkline(this.model.query, {width:'100px',fillColor:color});
-
-                this.$('.spark').append('<span class="max">' + _(this.model.query).max().toFixed(1) + '</span>');
-                this.$('.spark').append('<span class="min">' + _(this.model.query).min().toFixed(1) + '</span>');
-//                this.$('.spark').attr('title',this.model.query.toString())
             }
         });
-        window.data = new Data
+        window.data = new Data;
         window.data.reset({{ data|safe }});
+        window.l = new Line;
 
         var WorkSpace = Backbone.Router.extend({
             routes:{
-                '!/':'root'
+                '':'root'
+//                ,'#!/chart/':'chart'
             },
             root:function() {
                 window.data.each(function(model) {
@@ -94,6 +114,17 @@
                     var v = new View({model:model,el:el});
                     v.render();
                 });
+                var temp = _.template('<option value="<%= val %>"><%= name %></option>')
+                $('#id_model').change(function(e){
+                    $('#id_aggregate').empty()
+                    var model = $("#id_model option:selected").attr('value');
+                    _(positions[model]).each(function(dev,name){
+                    $('#id_aggregate').append(temp({name:dev.place+' '+dev.pos,val:name}))
+                    });
+                });
+            },
+            chart:function(){
+                console.log('chart')
             }
         });
 
@@ -101,9 +132,10 @@
             $.getJSON('/last/').success(function(json) {
                 _.forEach(json, function(d) {
                     data.get(d.id).set({value:d.value});
+                    data.get(d.id).view.spark()
                 });
             });
-            setTimeout(refresh, 6000);
+            setTimeout(refresh, reload_time);
         };
 
         var draw = function() {
@@ -137,9 +169,30 @@
             new WorkSpace;
             Backbone.history.start();
             refresh();
+
+            $('#time').change(function(e){
+                reload_time = parseInt($("#time option:selected").attr('value')) * 1000
+            })
         });
     </script>
 </head>
 <body>
+<div id="footer" class='column'>
+    <select id="time" name='time' title='Время обновления'>
+        <option value='10'>10 секунд</option>
+        <option value='30'>30 секунд</option>
+        <option value='60' selected="selected">1 минута</option>
+        <option value='120'>2 минуты</option>
+        <option value='300'>5 минут</option>
+    </select>
+</div>
+<div id='form' class='column'>
+        {{ form.model }}
+        <select title='Значения' name='aggregate' id='id_aggregate'></select>
+        {{ form.interval }}
+</div>
+<div id="chart" class='column'>
+
+</div>
 </body>
 </html>
