@@ -15,10 +15,19 @@ def data(request):
         model = get_model('bkz',form.cleaned_data['model'])
         queryset = model.objects.all()
         qss = qsstats.QuerySetStats(queryset,'date')
-        start = form.cleaned_data['start'] or datetime.date.today()
+
+        if form.cleaned_data['interval'] == 'hours':
+            default = datetime.datetime.now() - datetime.timedelta(0,0,0,0,60*8)
+        if form.cleaned_data['interval'] == 'minutes':
+            default = datetime.datetime.now() - datetime.timedelta(0,0,0,0,10)
+        if form.cleaned_data['interval'] == 'days':
+            default = datetime.date.today() - datetime.timedelta(7)
+        print default
+        start = form.cleaned_data['start'] or default
         end = form.cleaned_data['end'] or datetime.datetime.now()
         interval = form.cleaned_data['interval'] or 'hours'
         aggregate = form.cleaned_data['aggregate']
+
 
         s = map(lambda x: dict(date=int(x[0].strftime('%s'))*1000,value=x[1]),qss.time_series(start,end,aggregate=Avg(aggregate),interval=interval))
 

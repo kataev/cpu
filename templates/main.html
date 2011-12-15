@@ -101,6 +101,7 @@
                 this.$('span').html(this.model.get('value').toFixed(1));
             },
             show:function (e) {
+                $('#chart').append('<img src="/static/kendo/Default/loading.gif">');
                 var name = this.$('h2').text()
                 var get= {}
                 var id = this.model.get('id');
@@ -124,21 +125,21 @@
 
                 $.getJSON('./data/', get).success(
                         function (data) {
+                            $('#chart').empty();
                             var d = _(data).map(function (m) { return [parseInt(m.date)+1000*60*60*6,
                                 parseFloat(m.value.toFixed(2))] });
 
                             var chart = new Highcharts.Chart({
                                 chart:{ renderTo:'chart',
                                         defaultSeriesType:'line'},
-                                title: {text:null, x:-20},
+                                title: {text:name, x:0,floating:true},
                                 legend: { enabled:false },
                                 series:[ {name:name,data:d} ],
                                 xAxis:{title:{text:null},type:'datetime',dateTimeLabelFormats:{ month: '%d-%m', year:'%Y'}},
                                 yAxis: {
                                     title: { text:null },
-//                                    min: 0.6,
-                                    startOnTick: false,
-                                    showFirstLabel: false
+                                    startOnTick: false
+//                                    ,showFirstLabel: false
                                 },
                                 tooltip: {
                                     formatter: function() {

@@ -13,7 +13,7 @@
 }
 
 #footer {
-    border: 1px black solid;
+    /*border: 1px black solid;*/
     top:430px;
     width: 572px;
     height: 24px;
@@ -28,15 +28,31 @@
     font-size: 12px;
 }
 
+#id_interval {
+    position: absolute;
+    right: 15px;
+}
+
+
 .k-datepicker { width:100px !important; }
 .k-timepicker { width:70px !important; }
 #chart {
     left:200px;
-    top:260px;
+    top:269px;
     width:370px;
     height: 150px;
-    padding: 0px
+    padding: 0px;
+    text-align: center;
 }
+#chart h3 {
+    margin-top: 70px;
+}
+
+#chart img {
+    position: absolute;
+    top: 70px;
+}
+
 #chart span {
     position: absolute;
     top: 0px;
