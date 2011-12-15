@@ -179,7 +179,7 @@
         });
 
         var refresh = function () {
-            $.getJSON('/last/').success(function (json) {
+            $.getJSON('./last/').success(function (json) {
                 _.forEach(json, function (d) {
                     data.get(d.id).set({value:d.value});
                     data.get(d.id).view.spark()
