@@ -22,19 +22,27 @@
 
 #form {
     left:200px;
-    top:230px;
+    top:225px;
     width:370px;
     height: 20px;
+    font-size: 12px;
 }
 
+.k-datepicker { width:100px !important; }
+.k-timepicker { width:70px !important; }
 #chart {
     left:200px;
     top:260px;
     width:370px;
     height: 150px;
-    border: 1px black solid;
     padding: 0px
 }
+#chart span {
+    position: absolute;
+    top: 0px;
+}
+
+.datetime {width:50px;}
 
 #firing h1 {display: none;}
 
@@ -53,6 +61,7 @@ span {padding-left: 2px}
 .temp span:after { content: "\B0" }
 
 .spark {
+    cursor: pointer;
     display: inline-block;
     width: 100px;
     /*height: 36px;*/

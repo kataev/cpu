@@ -20,7 +20,7 @@ def data(request):
         interval = form.cleaned_data['interval'] or 'hours'
         aggregate = form.cleaned_data['aggregate']
 
-        s = map(lambda x: dict(date=x[0].strftime('%s'),value=x[1]),qss.time_series(start,end,aggregate=Avg(aggregate),interval=interval))
+        s = map(lambda x: dict(date=int(x[0].strftime('%s'))*1000,value=x[1]),qss.time_series(start,end,aggregate=Avg(aggregate),interval=interval))
 
         return HttpResponse(simplejson.dumps(s))
     else:

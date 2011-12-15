@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <title>CPU</title>
     <link href="/static/style.css" rel="stylesheet">
+    <link href="/static/kendo/kendo.common.min.css" rel="stylesheet">
+    <link href="/static/kendo/kendo.default.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
     <script src="/static/underscore-1.2.2.js"></script>
     <script src="/static/jquery-1.6.4.js"></script>
     <script src="/static/jquery.sparkline.min.js"></script>
     <script src="/static/json2.js"></script>
     <script src="/static/backbone.js"></script>
+    <script src="/static/highcharts.js"></script>
+
+    <script src="/static/kendo/kendo.core.min.js"></script>
+    <script src="/static/kendo/kendo.fx.min.js"></script>
+    <script src="/static/kendo/kendo.popup.min.js"></script>
+    <script src="/static/kendo/kendo.timepicker.min.js"></script>
+    <script src="/static/kendo/kendo.calendar.min.js"></script>
+    <script src="/static/kendo/kendo.datepicker.min.js"></script>
+
     <script type="text/template" id="group-template">
         <div class="column" id="<%- id %>">
             <h1><%- pos %></h1>
@@ -30,20 +42,20 @@
         var reload_time = 1000 * 60; // 1min
 
         var Unit = Backbone.Model.extend({
-            initialize:function(data) {
+            initialize:function (data) {
                 this.set({label:this.label()});
                 this.set({date:new Date(data.date)});
                 this.bind('change:value', this.changeValue);
                 this.query = this.get('query')
             },
-            label:function() {
+            label:function () {
                 id = this.get('id').split('_');
                 var d = positions[id[0]][id[1]];
                 return  d ? d.pos : undefined;
             },
-            changeValue:function() {
-                    var val = this.get('value')
-                    this.query = _(this.query).chain().slice(1).push(val.toFixed(1)).value();
+            changeValue:function () {
+                var val = this.get('value')
+                this.query = _(this.query).chain().slice(1).push(val.toFixed(1)).value();
             }
         });
 
@@ -52,7 +64,7 @@
         var Line = Backbone.Collection.extend({
             model:Point,
             url:'/data/'
-                                               })
+        })
 
         var Data = Backbone.Collection.extend({
             url:'/last/',
@@ -60,7 +72,7 @@
         });
 
         var View = Backbone.View.extend({
-            initialize: function(args) {
+            initialize:function (args) {
                 _.bindAll(this, 'changeValue');
                 this.model.bind('change:value', this.changeValue);
                 this.model.view = this;
@@ -68,34 +80,75 @@
                     $(this.el).addClass('temp')
                 }
             },
-            template: _.template($('#view-template').html()),
+            template:_.template($('#view-template').html()),
             tagName:'div',
             className:'cpu',
-            events: {
-                'click .spark': 'show'
+            events:{
+                'click .spark':'show'
             },
-            render: function() {
+            render:function () {
                 $(this.el).html(this.template(this.model.toJSON()));
                 this.spark();
                 return this;
             },
-            spark:function(){
+            spark:function () {
                 var color = this.model.get('id').split('_')[1] == 'hmdt' ? '#4e6aff' : '#ff7b4c';
-                this.$('.spark').sparkline(this.model.query, {width:'100px',fillColor:color,lineColor:'black'});
+                this.$('.spark').sparkline(this.model.query, {width:'100px', fillColor:color, lineColor:'black'});
                 this.$('.spark').append('<span class="max">' + _(this.model.query).max().toFixed(1) + '</span>');
                 this.$('.spark').append('<span class="min">' + _(this.model.query).min().toFixed(1) + '</span>');
             },
-            changeValue:function(val) {
+            changeValue:function (val) {
                 this.$('span').html(this.model.get('value').toFixed(1));
             },
-            show: function(e){
+            show:function (e) {
+                var name = this.$('h2').text()
+                var get= {}
                 var id = this.model.get('id');
-                var model = id.split('_')[0];
-                var aggregate = id.split('_')[1];
-                $.getJSON('/data/',{model:model,aggregate:aggregate}).success(function(data){
-                    var d =_(data).map(function(m){return m.value});
-                    $('#chart').sparkline(d,{width:'372px',height:'152px'});
-                })
+                get['model'] = id.split('_')[0];
+                get['aggregate'] = id.split('_')[1];
+                get['interval'] = $('#id_interval option:selected').attr('value');
+                var start_date = $('#id_start_0').data("kendoDatePicker").value()
+                var start_time = $('#id_start_1').data("kendoTimePicker").value()
+
+                var end_date = $('#id_end_0').data("kendoDatePicker").value()
+                var end_time = $('#id_end_1').data("kendoTimePicker").value()
+
+                    if (start_date){
+                        get['start_0'] = Highcharts.dateFormat('%Y-%m-%d',start_date*1+1000*60*60*6)
+                        get['start_1'] = Highcharts.dateFormat('%H:%M',start_time*1+1000*60*60*6)
+                    }
+                if (end_date){
+                    get['end_0'] = Highcharts.dateFormat('%Y-%m-%d',end_date.value()*1+1000*60*60*6)
+                    get['end_1'] = Highcharts.dateFormat('%H:%M',end_time.value()*1+1000*60*60*6)
+                }
+
+                $.getJSON('/data/', get).success(
+                        function (data) {
+                            var d = _(data).map(function (m) { return [parseInt(m.date)+1000*60*60*6,
+                                parseFloat(m.value.toFixed(2))] });
+
+                            var chart = new Highcharts.Chart({
+                                chart:{ renderTo:'chart',
+                                        defaultSeriesType:'line'},
+                                title: {text:null, x:-20},
+                                legend: { enabled:false },
+                                series:[ {name:name,data:d} ],
+                                xAxis:{title:{text:null},type:'datetime',dateTimeLabelFormats:{ month: '%d-%m', year:'%Y'}},
+                                yAxis: {
+                                    title: { text:null },
+//                                    min: 0.6,
+                                    startOnTick: false,
+                                    showFirstLabel: false
+                                },
+                                tooltip: {
+                                    formatter: function() {
+                                        return '<b>'+ this.series.name+ ':</b> <i>'+ this.y +'</i><br/>'+
+                                                Highcharts.dateFormat('%d-%m-%Y %H:%M', this.x);
+                                    }}
+                            });
+                        }).error(function (e) {
+                            $('#chart').empty().append('<h3>Произошла ошибка</h3>')
+                        });
 
             }
         });
@@ -108,29 +161,26 @@
                 '':'root'
 //                ,'#!/chart/':'chart'
             },
-            root:function() {
-                window.data.each(function(model) {
+            root:function () {
+                window.data.each(function (model) {
                     var el = $('#' + model.get('id'));
-                    var v = new View({model:model,el:el});
+                    var v = new View({model:model, el:el});
                     v.render();
                 });
-                var temp = _.template('<option value="<%= val %>"><%= name %></option>')
-                $('#id_model').change(function(e){
-                    $('#id_aggregate').empty()
-                    var model = $("#id_model option:selected").attr('value');
-                    _(positions[model]).each(function(dev,name){
-                    $('#id_aggregate').append(temp({name:dev.place+' '+dev.pos,val:name}))
-                    });
-                });
+
+                $("#id_start_0").kendoDatePicker({format: "dd-MM-yyyy"});
+                $("#id_start_1").kendoTimePicker({format: "HH:mm"});
+                $("#id_end_0").kendoDatePicker({format: "dd-MM-yyyy"});
+                $("#id_end_1").kendoTimePicker({format: "HH:mm"});
             },
-            chart:function(){
+            chart:function () {
                 console.log('chart')
             }
         });
 
-        var refresh = function() {
-            $.getJSON('/last/').success(function(json) {
-                _.forEach(json, function(d) {
+        var refresh = function () {
+            $.getJSON('/last/').success(function (json) {
+                _.forEach(json, function (d) {
                     data.get(d.id).set({value:d.value});
                     data.get(d.id).view.spark()
                 });
@@ -138,7 +188,7 @@
             setTimeout(refresh, reload_time);
         };
 
-        var draw = function() {
+        var draw = function () {
             var w = [];
             var template = _.template($('#group-template').html());
             for (var m in positions) {
@@ -146,31 +196,38 @@
                     var p = positions[m][a].p;
                     var place = positions[m][a].place;
                     var id = m + '_' + a;
-                    var gr = $('#' + p).length ? $('#' + p) : $(template({id:p,pos:place})).appendTo('body');
+                    var gr = $('#' + p).length ? $('#' + p) : $(template({id:p, pos:place})).appendTo('body');
                     var el = $(_.template('<div id="<%- id %>"></div>', {id:id})).appendTo(gr);
-                    w.push({gr:gr,el:el,a:a,m:m,p:p})
+                    w.push({gr:gr, el:el, a:a, m:m, p:p})
                 }
                 ;
             }
             ;
-            var s = _(w).chain().filter(function(e) { return e.m == 'termodat22m' && e.p == 'firing' })
-                        .sortBy( function(e) { return parseInt(e.a.slice(1)) }).value()
-            _(s).each(function(e, key) {
-                if (key == 0) {return;}
+            var s = _(w).chain().filter(function (e) {
+                return e.m == 'termodat22m' && e.p == 'firing'
+            })
+                    .sortBy(
+                    function (e) {
+                        return parseInt(e.a.slice(1))
+                    }).value()
+            _(s).each(function (e, key) {
+                if (key == 0) {
+                    return;
+                }
                 else {
-                    $(s[key-1].el).after($(e.el));
+                    $(s[key - 1].el).after($(e.el));
                 }
             });
             return w;
         }
 
-        $(function() {
+        $(function () {
             window.elems = draw();
             new WorkSpace;
             Backbone.history.start();
             refresh();
 
-            $('#time').change(function(e){
+            $('#time').change(function (e) {
                 reload_time = parseInt($("#time option:selected").attr('value')) * 1000
             })
         });
@@ -185,11 +242,20 @@
         <option value='120'>2 минуты</option>
         <option value='300'>5 минут</option>
     </select>
+        <select id="id_interval" required="false" name="interval" dojoType="dijit.form.Select">
+            <option value="minutes">Минутам</option>
+            <option selected='selected' value="hours">Часам</option>
+            <option value="days">Дням</option>
+        </select>
 </div>
 <div id='form' class='column'>
-        {{ form.model }}
-        <select title='Значения' name='aggregate' id='id_aggregate'></select>
-        {{ form.interval }}
+    <input placeholder="Дата начала" class='datetime' name='start_0' id='id_start_0' type='text'>
+    <input placeholder="Время начала" value='0:0' class='datetime' name='start_1' id='id_start_1' type='text'>
+
+    <input placeholder="Дата окончания" class='datetime' name='end_0' id='id_end_0' type='text'>
+    <input placeholder="Время окончания" value='0:0' class='datetime' name='end_1' id='id_end_1' type='text'>
+
+
 </div>
 <div id="chart" class='column'>
 
