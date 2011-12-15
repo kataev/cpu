@@ -118,8 +118,8 @@
                         get['start_1'] = Highcharts.dateFormat('%H:%M',start_time*1+1000*60*60*6)
                     }
                 if (end_date){
-                    get['end_0'] = Highcharts.dateFormat('%Y-%m-%d',end_date.value()*1+1000*60*60*6)
-                    get['end_1'] = Highcharts.dateFormat('%H:%M',end_time.value()*1+1000*60*60*6)
+                    get['end_0'] = Highcharts.dateFormat('%Y-%m-%d',end_date*1+1000*60*60*6)
+                    get['end_1'] = Highcharts.dateFormat('%H:%M',end_time*1+1000*60*60*6)
                 }
 
                 $.getJSON('/data/', get).success(
