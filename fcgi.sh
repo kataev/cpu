@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replace these three settings.
-PROJDIR="/home/django/cpu/"
+PROJDIR="/home/kd/cpu/"
 PIDFILE="$PROJDIR/cpu.pid"
 SOCKET="$PROJDIR/cpu.sock"
 

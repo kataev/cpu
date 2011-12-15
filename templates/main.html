@@ -101,7 +101,7 @@
                 this.$('span').html(this.model.get('value').toFixed(1));
             },
             show:function (e) {
-                $('#chart').append('<img src="/static/kendo/Default/loading.gif">');
+                $('#chart').empty().append('<img src="/static/kendo/Default/loading.gif">');
                 var name = this.$('h2').text()
                 var get= {}
                 var id = this.model.get('id');
@@ -243,6 +243,7 @@
         <option value='120'>2 минуты</option>
         <option value='300'>5 минут</option>
     </select>
+    <a href='#' onclick="window.open('./',null, 'height=460, width=590, toolbar=0, location=0, status=0, scrollbars=0, resizeable=0');window.close()">В новом окне</a>
         <select id="id_interval" required="false" name="interval" dojoType="dijit.form.Select">
             <option value="minutes">Минутам</option>
             <option selected='selected' value="hours">Часам</option>

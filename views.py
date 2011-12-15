@@ -56,20 +56,20 @@ def main(request):
 
     data = []
 
-    start = datetime.datetime.now() - datetime.timedelta(0,0,0,0,10)
-    end = datetime.datetime.now() - datetime.timedelta(0,0,0,0,1)
-    s = """where date >= '%s' and date <= '%s' """ % (start.isoformat(),end.isoformat())
-
-    q = dict(termodat22m=termodat22m.objects.raw("SELECT min(id) as id,min(date) as date,avg(t1) as t1,avg(t2) as t2,avg(t3) as t3,avg(t4) as t4,avg(t5) as t5,avg(t6) as t6,avg(t7) as t7,avg(t8) as t8,avg(t9) as t9,avg(t10) as t10,avg(t11) as t11,avg(t12) as t12,avg(t13) as t13,avg(t14) as t14,avg(t15) as t15,avg(t16) as t16,avg(t17) as t17,avg(t18) as t18,avg(t19) as t19,avg(t20) as t02,avg(t21) as t21,avg(t22) as t22,avg(t23) as t23,avg(t24) as t24 from bkz_%s %s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % ('termodat22m',s,'minutes',10)))
-
-    for mo in (dvt21,dvt22):
-        q[mo._meta.module_name] = mo.objects.raw("SELECT min(id) as id,min(date) as date,avg(hmdt) as hmdt,avg(temp) as temp from bkz_%s %s group by date_trunc('minutes',date) ORDER BY id DESC limit 10;" % (mo._meta.module_name,s))
-
+#    start = datetime.datetime.now() - datetime.timedelta(0,0,0,0,10)
+#    end = datetime.datetime.now() - datetime.timedelta(0,0,0,0,1)
+#    s = """where date >= '%s' and date <= '%s' """ % (start.isoformat(),end.isoformat())
+#
+#    q = dict(termodat22m=termodat22m.objects.raw("SELECT min(id) as id,min(date) as date,avg(t1) as t1,avg(t2) as t2,avg(t3) as t3,avg(t4) as t4,avg(t5) as t5,avg(t6) as t6,avg(t7) as t7,avg(t8) as t8,avg(t9) as t9,avg(t10) as t10,avg(t11) as t11,avg(t12) as t12,avg(t13) as t13,avg(t14) as t14,avg(t15) as t15,avg(t16) as t16,avg(t17) as t17,avg(t18) as t18,avg(t19) as t19,avg(t20) as t02,avg(t21) as t21,avg(t22) as t22,avg(t23) as t23,avg(t24) as t24 from bkz_%s %s group by date_trunc('%s',date) ORDER BY id DESC limit %s;" % ('termodat22m',s,'minutes',10)))
+#
+#    for mo in (dvt21,dvt22):
+#        q[mo._meta.module_name] = mo.objects.raw("SELECT min(id) as id,min(date) as date,avg(hmdt) as hmdt,avg(temp) as temp from bkz_%s %s group by date_trunc('minutes',date) ORDER BY id DESC limit 10;" % (mo._meta.module_name,s))
+#
     for m in models:
         obj = m.objects.latest('pk')
         for f in m._meta.fields:
             if f.name in ('date','id'): continue
-            query = map(lambda m: getattr(m,f.name),q[m._meta.module_name])
+            query = map(lambda m: 0,xrange(10))
             if getattr(obj,f.name):
                 data.append(dict(value=getattr(obj,f.name),id='%s_%s' % (m._meta.module_name,f.name),query=query))
 
